@@ -1441,10 +1441,9 @@
   /* —— Cup Stacking race timer + hype playlist —— */
   function formatStopwatch(ms) {
     const total = Math.max(0, Math.floor(ms));
-    const tenthsTotal = Math.floor(total / 100); /* hundredths */
-    const mins = Math.floor(tenthsTotal / 6000);
-    const secs = Math.floor((tenthsTotal % 6000) / 100);
-    const hundredths = tenthsTotal % 100;
+    const mins = Math.floor(total / 60000);
+    const secs = Math.floor((total % 60000) / 1000);
+    const hundredths = Math.floor((total % 1000) / 10);
     if (mins > 0) {
       return mins + ':' + String(secs).padStart(2, '0') + '.' + String(hundredths).padStart(2, '0');
     }
