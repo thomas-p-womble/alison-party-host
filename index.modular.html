@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Alison Party" />
+  <meta name="theme-color" content="#e91e8c" />
+  <meta name="description" content="Birthday party game host for Alison" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <title>Alison Party Host 🎂</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- HOME -->
+    <section id="view-home" class="view active">
+      <header class="hero">
+        <p class="eyebrow">🎂 Birthday Bash</p>
+        <h1>Alison Party Host</h1>
+        <p class="sub">Tap big. Play loud. Keep scores.</p>
+      </header>
+
+      <p id="yt-note" class="yt-note hidden" role="status"></p>
+
+      <div class="card playlist-card">
+        <h2>Playlist</h2>
+        <p class="hint" style="margin:0 0 8px">Audio-focused playback (YouTube audio hidden). Tap a song or use the dock below.</p>
+        <ol id="playlist" class="playlist"></ol>
+      </div>
+
+      <div class="card local-audio-card">
+        <h2>My song files</h2>
+        <p class="hint" style="margin:0 0 10px">Optional: load purchased tracks. Prefer over YouTube. Name like <code>01-choosing-texas.mp3</code>.</p>
+        <label class="btn primary" for="local-audio-input">Load my song files</label>
+        <input type="file" id="local-audio-input" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg" multiple />
+        <p id="local-audio-status">Optional: load purchased MP3/M4A files (named like 01-choosing-texas.mp3)</p>
+      </div>
+
+      <nav class="game-grid" aria-label="Games">
+        <button class="game-btn" data-view="name-tune">🎵 Name That Tune</button>
+        <button class="game-btn" data-view="wipe">📋 3-2-1 Show</button>
+        <button class="game-btn" data-view="lyrics">🎤 Sing-Along Cue</button>
+        <button class="game-btn" data-view="freeze">❄️ Freeze Dance</button>
+        <button class="game-btn" data-view="potato">🥔 Hot Potato</button>
+        <button class="game-btn" data-view="quizmaster">👑 Quizmaster</button>
+        <button class="game-btn" data-view="trivia">❓ Trivia Scores</button>
+        <button class="game-btn" data-view="timers">⏱️ Timers</button>
+      </nav>
+
+      <footer class="home-foot">
+        <button type="button" id="btn-reset-scores" class="linkish">Reset all scores</button>
+        <p class="hint">Safari → Share → Add to Home Screen</p>
+      </footer>
+    </section>
+
+    <!-- NAME THAT TUNE -->
+    <section id="view-name-tune" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Name That Tune</h1>
+      </header>
+      <div class="card song-now">
+        <p class="label">Now playing</p>
+        <p id="ntt-song" class="song-title">—</p>
+        <div class="row-btns">
+          <button type="button" id="ntt-play" class="btn primary">▶ Play clip</button>
+          <button type="button" id="ntt-pause" class="btn secondary">⏸ Pause</button>
+        </div>
+      </div>
+      <p class="coach" style="margin-top:0">First team to tap wins the buzz:</p>
+      <div class="buzz-grid" id="ntt-buzz-grid">
+        <button type="button" class="mega buzz team-buzz" data-team="A">🔔 A</button>
+        <button type="button" class="mega buzz team-buzz" data-team="B">🔔 B</button>
+        <button type="button" class="mega buzz team-buzz" data-team="C">🔔 C</button>
+      </div>
+      <p id="ntt-buzzed" class="buzz-result hidden"></p>
+      <div class="team-scores" id="ntt-teams"></div>
+      <div class="row-btns">
+        <button type="button" id="ntt-prev" class="btn secondary">◀ Prev</button>
+        <button type="button" id="ntt-next" class="btn primary">Next ▶</button>
+      </div>
+      <button type="button" id="ntt-clear-buzz" class="btn ghost">Clear buzz</button>
+    </section>
+
+    <!-- WIPE BOARD 3-2-1 -->
+    <section id="view-wipe" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>3-2-1 Show</h1>
+      </header>
+      <p class="coach">Kids write answer on wipe board. Host counts down. Reveal together!</p>
+      <div id="wipe-display" class="countdown-display">Ready</div>
+      <div class="row-btns stack">
+        <button type="button" id="wipe-go" class="mega">3 · 2 · 1 · SHOW!</button>
+        <button type="button" id="wipe-reset" class="btn secondary">Reset</button>
+      </div>
+      <div class="card tip">
+        <strong>Host tip:</strong> Pause music, say the prompt, give ~15s to write, then hit the button.
+      </div>
+    </section>
+
+    <!-- LYRIC CUE CARDS -->
+    <section id="view-lyrics" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Sing-Along Cue</h1>
+      </header>
+      <p class="coach">Host timing only — no full lyrics. Auto Sing mutes &amp; unmutes on a timer; kids finish the line.</p>
+      <div class="card cue-card">
+        <p class="label">Song</p>
+        <p id="lyric-song" class="song-title">—</p>
+        <div id="lyric-countdown" class="lyric-countdown" aria-live="polite"></div>
+        <div id="lyric-steps" class="cue-steps"></div>
+      </div>
+      <div class="row-btns stack">
+        <button type="button" id="lyric-auto" class="mega auto-sing">🎤 Auto Sing</button>
+        <p class="auto-sing-note">Timings matched to standard studio/Topic audio; if a Topic upload has silence padding, use Manual mute.</p>
+        <button type="button" id="lyric-play" class="mega play">▶ PLAY</button>
+        <button type="button" id="lyric-mute" class="mega freeze">🔇 MUTE NOW</button>
+        <button type="button" id="lyric-unmute" class="btn secondary">🔊 Unmute</button>
+      </div>
+      <div class="row-btns">
+        <button type="button" id="lyric-prev" class="btn secondary">◀ Prev</button>
+        <button type="button" id="lyric-next" class="btn primary">Next ▶</button>
+      </div>
+    </section>
+
+    <!-- FREEZE DANCE -->
+    <section id="view-freeze" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Freeze Dance</h1>
+      </header>
+      <div id="freeze-status" class="countdown-display dance">💃 DANCE!</div>
+      <div class="row-btns">
+        <button type="button" id="freeze-play" class="mega play">▶ PLAY</button>
+        <button type="button" id="freeze-pause" class="mega freeze">❄ FREEZE</button>
+      </div>
+      <div class="card">
+        <p class="label">Still in</p>
+        <div class="elim-row">
+          <button type="button" id="freeze-minus" class="btn circle">−</button>
+          <span id="freeze-count" class="big-num">12</span>
+          <button type="button" id="freeze-plus" class="btn circle">+</button>
+        </div>
+        <button type="button" id="freeze-elim" class="btn danger">Eliminate 1 (moved)</button>
+        <button type="button" id="freeze-reset-count" class="btn ghost">Reset count</button>
+      </div>
+      <div class="music-links playlist-mini" id="freeze-links"></div>
+    </section>
+
+    <!-- HOT POTATO -->
+    <section id="view-potato" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Hot Potato / Prize Pass</h1>
+      </header>
+      <p class="coach">Pass the prize while music plays. When it stops — that kid wins (or is out)!</p>
+      <div id="potato-status" class="countdown-display potato">🥔 Pass it!</div>
+      <p id="potato-timer" class="timer-readout">—</p>
+      <div class="row-btns stack">
+        <button type="button" id="potato-start" class="mega">▶ Start random stop</button>
+        <button type="button" id="potato-stop" class="mega freeze">STOP NOW</button>
+        <button type="button" id="potato-reset" class="btn secondary">Reset</button>
+      </div>
+      <div class="card tip">
+        Random stop between <strong>8–25 seconds</strong>. Start plays music in-app; stop pauses it.
+      </div>
+    </section>
+
+    <!-- QUIZMASTER -->
+    <section id="view-quizmaster" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Alison Quizmaster</h1>
+      </header>
+      <p class="coach">Rotate who asks the next question. Birthday girl goes first!</p>
+      <div id="qm-name" class="countdown-display qm">Alison 👑</div>
+      <div class="row-btns">
+        <button type="button" id="qm-next" class="mega">Next quizmaster →</button>
+      </div>
+      <div class="card">
+        <label class="field-label" for="qm-roster">Roster (one name per line)</label>
+        <textarea id="qm-roster" rows="6" spellcheck="false"></textarea>
+        <button type="button" id="qm-save" class="btn primary">Save roster</button>
+      </div>
+    </section>
+
+    <!-- TRIVIA SCORES -->
+    <section id="view-trivia" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Trivia Scores</h1>
+      </header>
+      <p class="coach">Use your paper questions. Tap +1 when a team is right.</p>
+      <div class="team-scores" id="trivia-teams"></div>
+      <div class="card tip">Keep the question cards in hand — this screen is the scoreboard only.</div>
+      <button type="button" id="trivia-reset" class="btn ghost">Reset trivia scores</button>
+    </section>
+
+    <!-- TIMERS -->
+    <section id="view-timers" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Timers</h1>
+      </header>
+      <div id="timer-display" class="countdown-display timer">1:00</div>
+      <div class="timer-presets">
+        <button type="button" class="btn timer-preset" data-sec="60">1 min</button>
+        <button type="button" class="btn timer-preset" data-sec="180">3 min</button>
+        <button type="button" class="btn timer-preset" data-sec="300">5 min</button>
+        <button type="button" class="btn timer-preset" data-sec="600">10 min</button>
+      </div>
+      <div class="row-btns">
+        <button type="button" id="timer-start" class="btn primary">Start</button>
+        <button type="button" id="timer-pause" class="btn secondary">Pause</button>
+        <button type="button" id="timer-reset" class="btn ghost">Reset</button>
+      </div>
+      <p id="timer-done" class="buzz-result hidden">⏰ Time’s up!</p>
+    </section>
+  </div>
+
+  <!-- Audio dock: YouTube iframe kept but visually hidden -->
+  <div id="mini-player" class="mini-player" aria-label="Audio player">
+    <div id="yt-player" class="yt-frame" aria-hidden="true"></div>
+    <div class="mini-main">
+      <p id="mini-song-title" class="mini-song-title">1. Choosin' Texas — Ella Langley</p>
+      <span id="audio-source-badge">YouTube audio</span>
+      <div class="mini-controls">
+        <button type="button" id="mini-prev" class="mini-btn" aria-label="Previous">⏮</button>
+        <button type="button" id="mini-play" class="mini-btn play" aria-label="Play or pause">▶</button>
+        <button type="button" id="mini-next" class="mini-btn" aria-label="Next">⏭</button>
+        <button type="button" id="mini-mute" class="mini-btn" aria-label="Mute">🔊</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
