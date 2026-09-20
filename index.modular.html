@@ -63,7 +63,7 @@
         <p class="how-title">What each game is</p>
         <ul class="game-legend">
           <li><strong>Name That Tune</strong> — play a clip; teams buzz in</li>
-          <li><strong>Write &amp; Show</strong> — everyone writes, then reveal together on 3-2-1</li>
+          <li><strong>Write &amp; Show</strong> — tween trivia; write answers, 3-2-1 flip boards</li>
           <li><strong>Sing-Along</strong> — mute the hook so kids sing</li>
           <li><strong>Freeze Dance</strong> — dance / freeze when music stops</li>
           <li><strong>Hot Potato</strong> — pass a prize; music stops at random</li>
@@ -134,21 +134,29 @@
         <h1>Write &amp; Show</h1>
       </header>
       <div class="card how-to">
-        <p class="how-title">What is this?</p>
-        <p>Every girl writes the answer on a wipe board / sticky note (no buzzing). When you hit the button, the phone counts <strong>3 · 2 · 1 · SHOW!</strong> and everyone holds up their board at once. Award points to everyone who’s right.</p>
         <p class="how-title">How to run it</p>
         <ol>
-          <li>Give each girl a wipe board + marker (or sticky + pen)</li>
-          <li>Ask a question (or play a short Name That Tune clip)</li>
-          <li>Give ~15 seconds to write</li>
-          <li>Tap <strong>3 · 2 · 1 · SHOW!</strong></li>
-          <li>Kids flip boards up together — you score</li>
+          <li>Read the trivia question out loud</li>
+          <li>Girls write on wipe boards / stickies (~15 sec)</li>
+          <li>Tap <strong>3 · 2 · 1 · SHOW!</strong> — everyone flips boards up</li>
+          <li>Tap <strong>Reveal answer</strong> (host only) to check</li>
+          <li>Tap <strong>Next</strong> for another question (22 total)</li>
         </ol>
+      </div>
+      <p id="wipe-progress" class="quiz-progress">Question 1 of 22</p>
+      <div class="card quiz-card">
+        <p id="wipe-question" class="quiz-question">—</p>
+        <p id="wipe-answer" class="wipe-answer hidden" aria-live="polite">Host answer: —</p>
+      </div>
+      <div class="row-btns">
+        <button type="button" id="wipe-prev" class="btn secondary">← Prev</button>
+        <button type="button" id="wipe-reveal" class="btn primary">Reveal answer</button>
+        <button type="button" id="wipe-next" class="btn primary">Next →</button>
       </div>
       <div id="wipe-display" class="countdown-display">Ready</div>
       <div class="row-btns stack">
         <button type="button" id="wipe-go" class="mega">3 · 2 · 1 · SHOW!</button>
-        <button type="button" id="wipe-reset" class="btn secondary">Reset</button>
+        <button type="button" id="wipe-reset" class="btn secondary">Reset countdown</button>
       </div>
     </section>
 

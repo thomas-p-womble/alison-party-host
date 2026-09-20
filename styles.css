@@ -941,3 +941,13 @@ textarea {
   border-bottom: 1px solid rgba(155, 126, 200, 0.25);
 }
 .game-legend li:last-child { border-bottom: 0; }
+
+.wipe-answer {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff8e1;
+  color: #e65100;
+  font-weight: 800;
+  font-size: 0.95rem;
+}

@@ -131,11 +131,39 @@
     { q: "If Alison could magically have any pet in the world (real or imaginary), what would she choose?" }
   ];
 
+
+  /* Write & Show — tween trivia (11–13). Host sees answer; kids write on boards. */
+  const WIPE_TRIVIA = [
+    { q: 'Which Disney movie has the song “Let It Go”?', a: 'Frozen' },
+    { q: 'What color do you get when you mix blue and yellow?', a: 'Green' },
+    { q: 'How many sides does an octagon have?', a: '8' },
+    { q: 'What is the name of Elsa’s sister in Frozen?', a: 'Anna' },
+    { q: 'Which planet is known as the Red Planet?', a: 'Mars' },
+    { q: 'What do bees make?', a: 'Honey' },
+    { q: 'In Harry Potter, what house has a lion as its symbol?', a: 'Gryffindor' },
+    { q: 'What is 7 × 8?', a: '56' },
+    { q: 'Which Taylor Swift album is named after a year?', a: '1989 (also acceptable: 1989 (Taylor’s Version))' },
+    { q: 'What animal is known for laughing (and living in Africa)?', a: 'Hyena' },
+    { q: 'How many continents are there?', a: '7' },
+    { q: 'What is the capital of France?', a: 'Paris' },
+    { q: 'In Moana, what is the name of the demigod who travels with her?', a: 'Maui' },
+    { q: 'What gas do plants “breathe in” that humans breathe out?', a: 'Carbon dioxide (CO₂)' },
+    { q: 'Which sport uses a shuttlecock?', a: 'Badminton' },
+    { q: 'What is the largest ocean on Earth?', a: 'Pacific Ocean' },
+    { q: 'In Encanto, who can hear the cracks in the house / has super hearing?', a: 'Dolores' },
+    { q: 'How many minutes are in two hours?', a: '120' },
+    { q: 'What do you call a baby cat?', a: 'Kitten' },
+    { q: 'Which pop star sings “Shake It Off”?', a: 'Taylor Swift' },
+    { q: 'What is H2O better known as?', a: 'Water' },
+    { q: 'In The Hunger Games, what district is Katniss from?', a: 'District 12' }
+  ];
+
   const DEFAULT_STATE = {
     nttScores: { A: 0, B: 0, C: 0 },
     nttIndex: 0,
     triviaScores: { A: 0, B: 0, C: 0 },
     triviaIndex: 0,
+    wipeIndex: 0,
     freezeCount: 12,
     lyricIndex: 0,
     qmRoster: ['Alison 👑', 'Guest 1', 'Guest 2', 'Guest 3', 'Guest 4'],
@@ -200,6 +228,7 @@
         nttIndex: state.nttIndex,
         triviaScores: state.triviaScores,
         triviaIndex: state.triviaIndex,
+        wipeIndex: state.wipeIndex,
         freezeCount: state.freezeCount,
         lyricIndex: state.lyricIndex,
         qmRoster: state.qmRoster,
@@ -854,6 +883,7 @@
     if (view) view.classList.add('active');
     window.scrollTo(0, 0);
     if (id === 'name-tune') renderNTT();
+    if (id === 'wipe') renderWipe();
     if (id === 'lyrics') renderLyrics();
     if (id === 'freeze') {
       enterFreezeMode();
@@ -1139,6 +1169,26 @@
     try {
       if (navigator.vibrate) navigator.vibrate(ms);
     } catch (_) {}
+  }
+
+
+  function renderWipe() {
+    if (typeof state.wipeIndex !== 'number' || state.wipeIndex < 0) state.wipeIndex = 0;
+    if (state.wipeIndex >= WIPE_TRIVIA.length) state.wipeIndex = WIPE_TRIVIA.length - 1;
+    const item = WIPE_TRIVIA[state.wipeIndex];
+    const prog = document.getElementById('wipe-progress');
+    const qEl = document.getElementById('wipe-question');
+    const aEl = document.getElementById('wipe-answer');
+    if (prog) prog.textContent = 'Question ' + (state.wipeIndex + 1) + ' of ' + WIPE_TRIVIA.length;
+    if (qEl) qEl.textContent = item.q;
+    if (aEl) {
+      aEl.textContent = 'Host answer: ' + item.a;
+      aEl.classList.add('hidden');
+    }
+    const prev = document.getElementById('wipe-prev');
+    const next = document.getElementById('wipe-next');
+    if (prev) prev.disabled = state.wipeIndex <= 0;
+    if (next) next.disabled = state.wipeIndex >= WIPE_TRIVIA.length - 1;
   }
 
   /* —— Wipe countdown —— */
@@ -1469,9 +1519,28 @@
 
     /* Wipe */
     safeOn('wipe-go', 'click', runWipe);
+    safeOn('wipe-prev', 'click', () => {
+      if (state.wipeIndex > 0) {
+        state.wipeIndex -= 1;
+        saveState();
+        renderWipe();
+      }
+    });
+    safeOn('wipe-next', 'click', () => {
+      if (state.wipeIndex < WIPE_TRIVIA.length - 1) {
+        state.wipeIndex += 1;
+        saveState();
+        renderWipe();
+      }
+    });
+    safeOn('wipe-reveal', 'click', () => {
+      const aEl = document.getElementById('wipe-answer');
+      if (aEl) aEl.classList.toggle('hidden');
+    });
     safeOn('wipe-reset', 'click', () => {
       clearTimeout(wipeTimer);
-      document.getElementById('wipe-display').textContent = 'Ready';
+      const el = document.getElementById('wipe-display');
+      if (el) el.textContent = 'Ready';
     });
 
     /* Lyrics — instant mute on pointerdown (not click/release) */
