@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Alison Party" />
+  <meta name="theme-color" content="#e91e8c" />
+  <meta name="description" content="Birthday party game host for Alison" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <title>Alison Party Host 🎂</title>
+  <style>
+/* Alison Party Host — pink/lilac mobile-first PWA */
+:root {
+  --pink: #e91e8c;
+  --pink-hot: #ff2d95;
+  --lilac: #b19cd9;
+  --lilac-deep: #9b7ec8;
+  --bg: #fce4ec;
+  --bg2: #f3e5f5;
+  --card: #ffffff;
+  --ink: #4a148c;
+  --ink-soft: #6a1b9a;
+  --muted: #8e6aa8;
+  --success: #2e7d32;
+  --danger: #c62828;
+  --gold: #ffd54f;
+  --shadow: 0 8px 24px rgba(233, 30, 140, 0.18);
+  --radius: 20px;
+  --tap: 56px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: var(--font);
+  background: linear-gradient(165deg, var(--bg) 0%, var(--bg2) 55%, #ffe0f0 100%);
+  background-attachment: fixed;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+body {
+  padding: calc(12px + var(--safe-top)) 14px calc(110px + var(--safe-bot));
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.view { display: none; animation: fadeIn 0.25s ease; }
+.view.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 8px 4px 16px;
+}
+.eyebrow {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--pink);
+}
+.hero h1 {
+  margin: 4px 0;
+  font-size: clamp(1.7rem, 7vw, 2.2rem);
+  line-height: 1.15;
+  background: linear-gradient(90deg, var(--pink), var(--lilac-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  border: 2px solid rgba(233, 30, 140, 0.12);
+}
+.card.tip { font-size: 0.95rem; color: var(--ink-soft); line-height: 1.4; }
+.label {
+  margin: 0 0 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+}
+.song-title {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+/* Playlist */
+.playlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.playlist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px;
+  border-bottom: 1px solid #f8bbd0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.playlist li:last-child { border-bottom: none; }
+.playlist li.playing {
+  background: rgba(233, 30, 140, 0.12);
+  border: 2px solid rgba(233, 30, 140, 0.35);
+}
+.playlist-play {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), var(--lilac-deep));
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.playlist-text { flex: 1; min-width: 0; }
+.playlist-title { display: block; font-weight: 700; }
+.playlist .artist {
+  display: block;
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Game grid */
+.game-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0;
+}
+.game-btn {
+  min-height: var(--tap);
+  padding: 14px 10px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fff 0%, #fce4ec 100%);
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 800;
+  box-shadow: var(--shadow);
+  border: 2px solid rgba(177, 156, 217, 0.45);
+  cursor: pointer;
+  line-height: 1.25;
+  transition: transform 0.12s ease, box-shadow 0.12s;
+}
+.game-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(233, 30, 140, 0.2);
+}
+
+/* View bar */
+.view-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.view-bar h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  flex: 1;
+}
+.back {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  border: none;
+  background: #fff;
+  color: var(--pink);
+  font-size: 1.4rem;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.coach {
+  margin: 0 0 14px;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Buttons */
+.btn {
+  min-height: var(--tap);
+  padding: 12px 18px;
+  border-radius: 14px;
+  border: none;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn.primary {
+  background: linear-gradient(135deg, var(--pink), var(--lilac-deep));
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.btn.secondary {
+  background: #fff;
+  color: var(--ink);
+  border: 2px solid var(--lilac);
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--muted);
+  width: 100%;
+  margin-top: 8px;
+}
+.btn.danger {
+  background: var(--danger);
+  color: #fff;
+  width: 100%;
+  margin-top: 10px;
+}
+.btn.circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--lilac);
+  color: #fff;
+  font-size: 1.6rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.btn.timer-preset {
+  background: #fff;
+  border: 2px solid var(--pink);
+  color: var(--pink);
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+}
+.btn.timer-preset.active {
+  background: var(--pink);
+  color: #fff;
+}
+
+.mega {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 18px;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: var(--shadow);
+  color: #fff;
+  background: linear-gradient(135deg, var(--pink-hot), var(--lilac-deep));
+}
+.mega:active { transform: scale(0.97); }
+.mega.buzz { background: linear-gradient(135deg, #ff6f00, #e91e8c); font-size: 1.6rem; min-height: 88px; }
+.mega.play { background: linear-gradient(135deg, #43a047, #66bb6a); }
+.mega.freeze { background: linear-gradient(135deg, #1565c0, #7e57c2); }
+
+.row-btns {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
+.row-btns .btn, .row-btns .mega { flex: 1; }
+.row-btns.stack { flex-direction: column; }
+
+/* Countdown / status displays */
+.countdown-display {
+  background: #fff;
+  border-radius: 24px;
+  min-height: 140px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: clamp(2.4rem, 12vw, 3.5rem);
+  font-weight: 900;
+  color: var(--pink);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  border: 3px solid rgba(233, 30, 140, 0.25);
+  padding: 20px;
+  line-height: 1.1;
+  word-break: break-word;
+}
+.countdown-display.dance { color: #2e7d32; }
+.countdown-display.dance.frozen { color: #1565c0; background: #e3f2fd; }
+.countdown-display.potato { color: #ef6c00; }
+.countdown-display.potato.stopped { color: var(--danger); background: #ffebee; }
+.countdown-display.qm { font-size: clamp(1.8rem, 8vw, 2.6rem); color: var(--lilac-deep); }
+.countdown-display.timer { font-variant-numeric: tabular-nums; font-size: clamp(3rem, 16vw, 4.5rem); }
+.countdown-display.pulse { animation: pulse 0.5s ease; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+/* Teams */
+.team-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 0;
+}
+.team-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+  background: #fff;
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  border: 2px solid transparent;
+}
+.team-row.winner {
+  border-color: var(--gold);
+  background: #fffde7;
+}
+.team-name {
+  font-weight: 900;
+  font-size: 1.2rem;
+}
+.team-score {
+  font-size: 1.6rem;
+  font-weight: 900;
+  min-width: 2.2ch;
+  text-align: center;
+  color: var(--pink);
+  font-variant-numeric: tabular-nums;
+}
+.team-row .btn.circle {
+  width: 48px;
+  height: 48px;
+  font-size: 1.4rem;
+}
+
+.buzz-result {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--pink);
+  padding: 12px;
+  background: #fff;
+  border-radius: 14px;
+  margin: 8px 0;
+  box-shadow: var(--shadow);
+}
+.buzz-result.hidden, .hidden { display: none !important; }
+
+/* Song pick chips (freeze etc.) */
+.music-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.music-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  min-height: 44px;
+  border-radius: 999px;
+  background: #f3e5f5;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid var(--lilac);
+  cursor: pointer;
+  font-family: inherit;
+}
+.music-link:active { transform: scale(0.97); }
+
+.playlist-mini {
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.yt-note {
+  background: #fff3e0;
+  border: 2px solid #ffb74d;
+  color: #e65100;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  margin: 0 0 12px;
+}
+.yt-note.hidden { display: none !important; }
+
+/* Persistent mini player */
+.mini-player {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 10px 12px calc(10px + var(--safe-bot));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 2px solid rgba(233, 30, 140, 0.25);
+  box-shadow: 0 -8px 28px rgba(74, 20, 140, 0.12);
+}
+.yt-frame {
+  flex-shrink: 0;
+  width: 120px;
+  height: 68px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #111;
+  pointer-events: none;
+}
+.yt-frame iframe {
+  width: 120px !important;
+  height: 68px !important;
+  border: 0;
+}
+.mini-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mini-song-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.mini-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.mini-btn {
+  width: 52px;
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: #f3e5f5;
+  color: var(--ink);
+  font-size: 1.25rem;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 2px 8px rgba(155, 126, 200, 0.25);
+}
+.mini-btn.play {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--pink-hot), var(--lilac-deep));
+  color: #fff;
+  font-size: 1.45rem;
+  box-shadow: var(--shadow);
+}
+.mini-btn:active { transform: scale(0.94); }
+
+/* Cue steps */
+.cue-steps {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cue-step {
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+.cue-step.play { background: #e8f5e9; color: #1b5e20; border: 2px solid #81c784; }
+.cue-step.mute { background: #ffebee; color: #b71c1c; border: 2px solid #ef9a9a; }
+.cue-step.kids { background: #fff8e1; color: #e65100; border: 2px solid #ffcc80; }
+.cue-step .step-num {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: currentColor;
+  color: #fff;
+  text-align: center;
+  line-height: 28px;
+  font-size: 0.85rem;
+  margin-right: 8px;
+  vertical-align: middle;
+  /* fix: white text on colored bg via mix */
+}
+.cue-step.play .step-num { background: #1b5e20; color: #fff; }
+.cue-step.mute .step-num { background: #b71c1c; color: #fff; }
+.cue-step.kids .step-num { background: #e65100; color: #fff; }
+
+/* Freeze / potato extras */
+.elim-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 8px 0;
+}
+.big-num {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--pink);
+  min-width: 2.5ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.timer-readout {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--muted);
+  margin: -6px 0 10px;
+  font-variant-numeric: tabular-nums;
+}
+.timer-presets {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Quizmaster */
+.field-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+textarea {
+  width: 100%;
+  border: 2px solid var(--lilac);
+  border-radius: 12px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  margin-bottom: 10px;
+  color: var(--ink);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.home-foot {
+  text-align: center;
+  margin-top: 8px;
+  padding-bottom: 8px;
+}
+.linkish {
+  background: none;
+  border: none;
+  color: var(--muted);
+  text-decoration: underline;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 12px;
+  font-family: inherit;
+}
+.hint {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(118px + var(--safe-bot));
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.hidden { display: none; }
+
+/* Standalone PWA polish */
+@media (display-mode: standalone) {
+  body { padding-top: calc(20px + var(--safe-top)); }
+}
+
+@media (min-width: 500px) {
+  .game-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.buzz-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+.buzz-grid .mega.buzz {
+  margin: 0;
+  min-height: 80px;
+  font-size: 1.25rem;
+  padding: 12px 6px;
+}
+.buzz-grid .mega.buzz:nth-child(1) { background: linear-gradient(135deg, #e91e8c, #f06292); }
+.buzz-grid .mega.buzz:nth-child(2) { background: linear-gradient(135deg, #7e57c2, #b39ddb); }
+.buzz-grid .mega.buzz:nth-child(3) { background: linear-gradient(135deg, #ff6f00, #ffb74d); }
+.buzz-grid .mega.buzz:disabled {
+  opacity: 0.45;
+  transform: none;
+}
+
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- HOME -->
+    <section id="view-home" class="view active">
+      <header class="hero">
+        <p class="eyebrow">🎂 Birthday Bash</p>
+        <h1>Alison Party Host</h1>
+        <p class="sub">Tap big. Play loud. Keep scores.</p>
+      </header>
+
+      <p id="yt-note" class="yt-note hidden" role="status"></p>
+
+      <div class="card playlist-card">
+        <h2>Playlist</h2>
+        <p class="hint" style="margin:0 0 8px">Music plays inside this app (YouTube). Tap a song or use the bar below.</p>
+        <ol id="playlist" class="playlist"></ol>
+      </div>
+
+      <nav class="game-grid" aria-label="Games">
+        <button class="game-btn" data-view="name-tune">🎵 Name That Tune</button>
+        <button class="game-btn" data-view="wipe">📋 3-2-1 Show</button>
+        <button class="game-btn" data-view="lyrics">🎤 Sing-Along Cue</button>
+        <button class="game-btn" data-view="freeze">❄️ Freeze Dance</button>
+        <button class="game-btn" data-view="potato">🥔 Hot Potato</button>
+        <button class="game-btn" data-view="quizmaster">👑 Quizmaster</button>
+        <button class="game-btn" data-view="trivia">❓ Trivia Scores</button>
+        <button class="game-btn" data-view="timers">⏱️ Timers</button>
+      </nav>
+
+      <footer class="home-foot">
+        <button type="button" id="btn-reset-scores" class="linkish">Reset all scores</button>
+        <p class="hint">Safari → Share → Add to Home Screen</p>
+      </footer>
+    </section>
+
+    <!-- NAME THAT TUNE -->
+    <section id="view-name-tune" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Name That Tune</h1>
+      </header>
+      <div class="card song-now">
+        <p class="label">Now playing</p>
+        <p id="ntt-song" class="song-title">—</p>
+        <div class="row-btns">
+          <button type="button" id="ntt-play" class="btn primary">▶ Play clip</button>
+          <button type="button" id="ntt-pause" class="btn secondary">⏸ Pause</button>
+        </div>
+      </div>
+      <p class="coach" style="margin-top:0">First team to tap wins the buzz:</p>
+      <div class="buzz-grid" id="ntt-buzz-grid">
+        <button type="button" class="mega buzz team-buzz" data-team="A">🔔 A</button>
+        <button type="button" class="mega buzz team-buzz" data-team="B">🔔 B</button>
+        <button type="button" class="mega buzz team-buzz" data-team="C">🔔 C</button>
+      </div>
+      <p id="ntt-buzzed" class="buzz-result hidden"></p>
+      <div class="team-scores" id="ntt-teams"></div>
+      <div class="row-btns">
+        <button type="button" id="ntt-prev" class="btn secondary">◀ Prev</button>
+        <button type="button" id="ntt-next" class="btn primary">Next ▶</button>
+      </div>
+      <button type="button" id="ntt-clear-buzz" class="btn ghost">Clear buzz</button>
+    </section>
+
+    <!-- WIPE BOARD 3-2-1 -->
+    <section id="view-wipe" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>3-2-1 Show</h1>
+      </header>
+      <p class="coach">Kids write answer on wipe board. Host counts down. Reveal together!</p>
+      <div id="wipe-display" class="countdown-display">Ready</div>
+      <div class="row-btns stack">
+        <button type="button" id="wipe-go" class="mega">3 · 2 · 1 · SHOW!</button>
+        <button type="button" id="wipe-reset" class="btn secondary">Reset</button>
+      </div>
+      <div class="card tip">
+        <strong>Host tip:</strong> Pause music, say the prompt, give ~15s to write, then hit the button.
+      </div>
+    </section>
+
+    <!-- LYRIC CUE CARDS -->
+    <section id="view-lyrics" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Sing-Along Cue</h1>
+      </header>
+      <p class="coach">Host timing only — no full lyrics. Play → MUTE → kids finish the line.</p>
+      <div class="card cue-card">
+        <p class="label">Song</p>
+        <p id="lyric-song" class="song-title">—</p>
+        <div id="lyric-steps" class="cue-steps"></div>
+      </div>
+      <div class="row-btns stack">
+        <button type="button" id="lyric-play" class="mega play">▶ PLAY</button>
+        <button type="button" id="lyric-mute" class="mega freeze">🔇 MUTE NOW</button>
+        <button type="button" id="lyric-unmute" class="btn secondary">🔊 Unmute</button>
+      </div>
+      <div class="row-btns">
+        <button type="button" id="lyric-prev" class="btn secondary">◀ Prev</button>
+        <button type="button" id="lyric-next" class="btn primary">Next ▶</button>
+      </div>
+    </section>
+
+    <!-- FREEZE DANCE -->
+    <section id="view-freeze" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Freeze Dance</h1>
+      </header>
+      <div id="freeze-status" class="countdown-display dance">💃 DANCE!</div>
+      <div class="row-btns">
+        <button type="button" id="freeze-play" class="mega play">▶ PLAY</button>
+        <button type="button" id="freeze-pause" class="mega freeze">❄ FREEZE</button>
+      </div>
+      <div class="card">
+        <p class="label">Still in</p>
+        <div class="elim-row">
+          <button type="button" id="freeze-minus" class="btn circle">−</button>
+          <span id="freeze-count" class="big-num">12</span>
+          <button type="button" id="freeze-plus" class="btn circle">+</button>
+        </div>
+        <button type="button" id="freeze-elim" class="btn danger">Eliminate 1 (moved)</button>
+        <button type="button" id="freeze-reset-count" class="btn ghost">Reset count</button>
+      </div>
+      <div class="music-links playlist-mini" id="freeze-links"></div>
+    </section>
+
+    <!-- HOT POTATO -->
+    <section id="view-potato" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Hot Potato / Prize Pass</h1>
+      </header>
+      <p class="coach">Pass the prize while music plays. When it stops — that kid wins (or is out)!</p>
+      <div id="potato-status" class="countdown-display potato">🥔 Pass it!</div>
+      <p id="potato-timer" class="timer-readout">—</p>
+      <div class="row-btns stack">
+        <button type="button" id="potato-start" class="mega">▶ Start random stop</button>
+        <button type="button" id="potato-stop" class="mega freeze">STOP NOW</button>
+        <button type="button" id="potato-reset" class="btn secondary">Reset</button>
+      </div>
+      <div class="card tip">
+        Random stop between <strong>8–25 seconds</strong>. Start plays music in-app; stop pauses it.
+      </div>
+    </section>
+
+    <!-- QUIZMASTER -->
+    <section id="view-quizmaster" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Alison Quizmaster</h1>
+      </header>
+      <p class="coach">Rotate who asks the next question. Birthday girl goes first!</p>
+      <div id="qm-name" class="countdown-display qm">Alison 👑</div>
+      <div class="row-btns">
+        <button type="button" id="qm-next" class="mega">Next quizmaster →</button>
+      </div>
+      <div class="card">
+        <label class="field-label" for="qm-roster">Roster (one name per line)</label>
+        <textarea id="qm-roster" rows="6" spellcheck="false"></textarea>
+        <button type="button" id="qm-save" class="btn primary">Save roster</button>
+      </div>
+    </section>
+
+    <!-- TRIVIA SCORES -->
+    <section id="view-trivia" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Trivia Scores</h1>
+      </header>
+      <p class="coach">Use your paper questions. Tap +1 when a team is right.</p>
+      <div class="team-scores" id="trivia-teams"></div>
+      <div class="card tip">Keep the question cards in hand — this screen is the scoreboard only.</div>
+      <button type="button" id="trivia-reset" class="btn ghost">Reset trivia scores</button>
+    </section>
+
+    <!-- TIMERS -->
+    <section id="view-timers" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Timers</h1>
+      </header>
+      <div id="timer-display" class="countdown-display timer">1:00</div>
+      <div class="timer-presets">
+        <button type="button" class="btn timer-preset" data-sec="60">1 min</button>
+        <button type="button" class="btn timer-preset" data-sec="180">3 min</button>
+        <button type="button" class="btn timer-preset" data-sec="300">5 min</button>
+        <button type="button" class="btn timer-preset" data-sec="600">10 min</button>
+      </div>
+      <div class="row-btns">
+        <button type="button" id="timer-start" class="btn primary">Start</button>
+        <button type="button" id="timer-pause" class="btn secondary">Pause</button>
+        <button type="button" id="timer-reset" class="btn ghost">Reset</button>
+      </div>
+      <p id="timer-done" class="buzz-result hidden">⏰ Time’s up!</p>
+    </section>
+  </div>
+
+  <!-- Persistent mini player (YouTube IFrame API) -->
+  <div id="mini-player" class="mini-player" aria-label="Music player">
+    <div id="yt-player" class="yt-frame"></div>
+    <div class="mini-main">
+      <p id="mini-song-title" class="mini-song-title">1. Choosin' Texas — Ella Langley</p>
+      <div class="mini-controls">
+        <button type="button" id="mini-prev" class="mini-btn" aria-label="Previous">⏮</button>
+        <button type="button" id="mini-play" class="mini-btn play" aria-label="Play or pause">▶</button>
+        <button type="button" id="mini-next" class="mini-btn" aria-label="Next">⏭</button>
+        <button type="button" id="mini-mute" class="mini-btn" aria-label="Mute">🔊</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+  <script>
+/* Alison Party Host — party ASAP + in-app YouTube player */
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'alison-party-v1';
+
+  /* youtubeId verified 2026-09-20 via oEmbed (replaced broken/wrong IDs) */
+  const PLAYLIST = [
+    { id: 1, title: "Choosin' Texas", artist: 'Ella Langley', youtubeId: 'nUsrYVxrDwI' },
+    { id: 2, title: 'You Belong With Me', artist: 'Taylor Swift', youtubeId: 'VuNIsY6JdUw' },
+    { id: 3, title: 'Sweet Caroline', artist: 'Neil Diamond', youtubeId: 'GmK5_lnQUbE' },
+    { id: 4, title: 'Eye of the Tiger', artist: 'Survivor', youtubeId: 'btPJPFnesV4' },
+    { id: 5, title: "Don't Stop Believin'", artist: 'Journey', youtubeId: '1k8craCGpgs' },
+    { id: 6, title: '22', artist: 'Taylor Swift', youtubeId: 'AgFeZr5ptV8' },
+    { id: 7, title: 'Roar', artist: 'Katy Perry', youtubeId: 'CevxZvSJLk8' },
+    { id: 8, title: 'Party in the USA', artist: 'Miley Cyrus', youtubeId: 'M11SvDtPBhA' },
+    { id: 9, title: 'Shake It Off', artist: 'Taylor Swift', youtubeId: 'nfWlot6h_JM' }
+  ];
+
+  /* Host timing cards only — NO full copyrighted lyrics */
+  const LYRIC_CUES = {
+    1: {
+      play: 'Play opening / chorus energy',
+      mute: 'MUTE NOW before the big shout line',
+      kids: 'Kids finish / shout the Texas hook'
+    },
+    2: {
+      play: 'Play verse → approach chorus',
+      mute: 'MUTE right before “you belong…”',
+      kids: 'Kids finish the chorus line'
+    },
+    3: {
+      play: 'Play until the famous “bah bah bah”',
+      mute: 'MUTE — hands ready',
+      kids: 'Kids sing the bahs + “Sweet Caroline!”'
+    },
+    4: {
+      play: 'Play the iconic guitar riff in',
+      mute: 'MUTE before the title line',
+      kids: 'Kids belt “Eye of the Tiger!”'
+    },
+    5: {
+      play: 'Play into the big chorus',
+      mute: 'MUTE before “don’t stop…”',
+      kids: 'Kids finish “Don’t Stop Believin’!”'
+    },
+    6: {
+      play: 'Play toward the “twenty-two” hook',
+      mute: 'MUTE NOW',
+      kids: 'Kids shout “22!” / finish the line'
+    },
+    7: {
+      play: 'Play into the roar chorus',
+      mute: 'MUTE before the roar',
+      kids: 'Kids ROAR / finish the chorus'
+    },
+    8: {
+      play: 'Play into “party in the USA”',
+      mute: 'MUTE NOW',
+      kids: 'Kids finish “Party in the USA!”'
+    },
+    9: {
+      play: 'Play into “shake it off”',
+      mute: 'MUTE before the title hook',
+      kids: 'Kids shake + finish the line'
+    }
+  };
+
+  const DEFAULT_STATE = {
+    nttScores: { A: 0, B: 0, C: 0 },
+    nttIndex: 0,
+    triviaScores: { A: 0, B: 0, C: 0 },
+    freezeCount: 12,
+    lyricIndex: 0,
+    qmRoster: ['Alison 👑', 'Guest 1', 'Guest 2', 'Guest 3', 'Guest 4'],
+    qmIndex: 0,
+    musicIndex: 0
+  };
+
+  let state = loadState();
+  let nttBuzzed = null;
+  let wipeTimer = null;
+  let potatoTimer = null;
+  let potatoDeadline = 0;
+  let potatoTick = null;
+  let timerSec = 60;
+  let timerLeft = 60;
+  let timerId = null;
+  let timerRunning = false;
+
+  /* —— YouTube mini player —— */
+  let ytPlayer = null;
+  let musicReady = false;
+  let musicMuted = false;
+  let musicPlaying = false;
+  let pendingPlay = false;
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return structuredClone(DEFAULT_STATE);
+      return { ...structuredClone(DEFAULT_STATE), ...JSON.parse(raw) };
+    } catch {
+      return structuredClone(DEFAULT_STATE);
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        nttScores: state.nttScores,
+        nttIndex: state.nttIndex,
+        triviaScores: state.triviaScores,
+        freezeCount: state.freezeCount,
+        lyricIndex: state.lyricIndex,
+        qmRoster: state.qmRoster,
+        qmIndex: state.qmIndex,
+        musicIndex: state.musicIndex
+      }));
+    } catch (_) { /* ignore quota */ }
+  }
+
+  function structuredClone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.add('hidden'), 2200);
+  }
+
+  function currentSong() {
+    const i = ((state.musicIndex % PLAYLIST.length) + PLAYLIST.length) % PLAYLIST.length;
+    state.musicIndex = i;
+    return PLAYLIST[i];
+  }
+
+  function songLabel(song, index) {
+    return (index + 1) + '. ' + song.title + (song.artist ? ' — ' + song.artist : '');
+  }
+
+  function updateMiniUI() {
+    const song = currentSong();
+    const titleEl = document.getElementById('mini-song-title');
+    if (titleEl) titleEl.textContent = songLabel(song, state.musicIndex);
+
+    const playBtn = document.getElementById('mini-play');
+    if (playBtn) playBtn.textContent = musicPlaying ? '⏸' : '▶';
+
+    const muteBtn = document.getElementById('mini-mute');
+    if (muteBtn) {
+      muteBtn.textContent = musicMuted ? '🔇' : '🔊';
+      muteBtn.setAttribute('aria-label', musicMuted ? 'Unmute' : 'Mute');
+    }
+
+    document.querySelectorAll('.playlist li').forEach((li) => {
+      li.classList.toggle('playing', Number(li.dataset.index) === state.musicIndex);
+    });
+  }
+
+  function ensurePlayer(thenPlay) {
+    if (!musicReady || !ytPlayer) {
+      if (thenPlay) pendingPlay = true;
+      toast('Loading YouTube… tap Play again in a sec');
+      return false;
+    }
+    return true;
+  }
+
+  function loadTrack(index, autoplay) {
+    state.musicIndex = ((index % PLAYLIST.length) + PLAYLIST.length) % PLAYLIST.length;
+    saveState();
+    updateMiniUI();
+    const song = currentSong();
+    if (!musicReady || !ytPlayer) {
+      if (autoplay) pendingPlay = true;
+      return;
+    }
+    try {
+      if (autoplay) {
+        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: 0 });
+        pendingPlay = true;
+      } else {
+        ytPlayer.cueVideoById({ videoId: song.youtubeId, startSeconds: 0 });
+      }
+    } catch (e) {
+      toast('Could not load track');
+    }
+  }
+
+  function musicPlay() {
+    if (!ensurePlayer(true)) return;
+    const song = currentSong();
+    try {
+      const st = ytPlayer.getPlayerState();
+      /* -1 unstarted, 5 cued, 2 paused, 0 ended */
+      if (st === 0 || st === 5 || st === -1 || st === undefined) {
+        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: 0 });
+      }
+      ytPlayer.playVideo();
+      if (musicMuted) ytPlayer.mute();
+      else ytPlayer.unMute();
+    } catch (e) {
+      toast('Play blocked — tap ▶ again');
+    }
+  }
+
+  function musicPause() {
+    if (!ytPlayer || !musicReady) return;
+    try { ytPlayer.pauseVideo(); } catch (_) {}
+  }
+
+  function musicTogglePlay() {
+    if (musicPlaying) musicPause();
+    else musicPlay();
+  }
+
+  function musicMute() {
+    musicMuted = true;
+    if (ytPlayer && musicReady) {
+      try { ytPlayer.mute(); } catch (_) {}
+    }
+    updateMiniUI();
+  }
+
+  function musicUnmute() {
+    musicMuted = false;
+    if (ytPlayer && musicReady) {
+      try { ytPlayer.unMute(); } catch (_) {}
+    }
+    updateMiniUI();
+  }
+
+  function musicToggleMute() {
+    if (musicMuted) musicUnmute();
+    else musicMute();
+  }
+
+  function musicNext(autoplay) {
+    loadTrack(state.musicIndex + 1, autoplay !== false ? musicPlaying || autoplay === true : false);
+    if (autoplay === true || musicPlaying) musicPlay();
+  }
+
+  function musicPrev(autoplay) {
+    loadTrack(state.musicIndex - 1, autoplay !== false ? musicPlaying || autoplay === true : false);
+    if (autoplay === true || musicPlaying) musicPlay();
+  }
+
+  function onPlayerReady() {
+    musicReady = true;
+    const song = currentSong();
+    try {
+      ytPlayer.cueVideoById({ videoId: song.youtubeId });
+      if (musicMuted) ytPlayer.mute();
+    } catch (_) {}
+    updateMiniUI();
+    if (pendingPlay) {
+      pendingPlay = false;
+      musicPlay();
+    }
+    const note = document.getElementById('yt-note');
+    if (note) note.classList.add('hidden');
+  }
+
+  function onPlayerStateChange(ev) {
+    /* YT.PlayerState: PLAYING=1 PAUSED=2 ENDED=0 BUFFERING=3 CUED=5 */
+    const s = ev.data;
+    musicPlaying = s === 1 || s === 3;
+    updateMiniUI();
+    if (s === 0) {
+      /* auto-advance */
+      loadTrack(state.musicIndex + 1, true);
+      musicPlay();
+    }
+  }
+
+  function onPlayerError() {
+    toast('This video blocked — skip to next');
+    setTimeout(() => {
+      loadTrack(state.musicIndex + 1, true);
+      musicPlay();
+    }, 400);
+  }
+
+  function initYouTube() {
+    if (location.protocol === 'file:') {
+      const note = document.getElementById('yt-note');
+      if (note) {
+        note.classList.remove('hidden');
+        note.textContent = '⚠️ YouTube needs HTTP — run a tiny local server (see README), then open that URL in Safari.';
+      }
+    }
+
+    window.onYouTubeIframeAPIReady = function () {
+      ytPlayer = new YT.Player('yt-player', {
+        width: '120',
+        height: '68',
+        videoId: currentSong().youtubeId,
+        playerVars: {
+          playsinline: 1,
+          controls: 0,
+          rel: 0,
+          modestbranding: 1,
+          fs: 0,
+          disablekb: 1,
+          iv_load_policy: 3,
+          origin: location.origin === 'null' ? undefined : location.origin
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
+        }
+      });
+    };
+
+    if (window.YT && window.YT.Player) {
+      window.onYouTubeIframeAPIReady();
+      return;
+    }
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.async = true;
+    document.head.appendChild(tag);
+  }
+
+  function showView(id) {
+    document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
+    const view = document.getElementById('view-' + id);
+    if (view) view.classList.add('active');
+    window.scrollTo(0, 0);
+    if (id === 'name-tune') renderNTT();
+    if (id === 'lyrics') renderLyrics();
+    if (id === 'freeze') renderFreeze();
+    if (id === 'quizmaster') renderQM();
+    if (id === 'trivia') renderTrivia();
+    if (id === 'timers') renderTimer();
+  }
+
+  /* —— Home playlist —— */
+  function renderPlaylist() {
+    const ol = document.getElementById('playlist');
+    ol.innerHTML = PLAYLIST.map((s, i) =>
+      '<li data-index="' + i + '" class="' + (i === state.musicIndex ? 'playing' : '') + '">' +
+      '<button type="button" class="playlist-play" data-index="' + i + '" aria-label="Play ' + escapeHtml(s.title) + '">▶</button>' +
+      '<div class="playlist-text">' +
+      '<span class="playlist-title">' + escapeHtml(s.title) + '</span>' +
+      '<span class="artist">' + escapeHtml(s.artist) + '</span>' +
+      '</div></li>'
+    ).join('');
+    ol.querySelectorAll('.playlist-play, li').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = Number(el.dataset.index);
+        if (Number.isNaN(idx)) return;
+        const same = idx === state.musicIndex && musicPlaying;
+        if (same) {
+          musicPause();
+        } else {
+          loadTrack(idx, true);
+          musicPlay();
+        }
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* —— Name That Tune —— */
+  function renderNTT() {
+    const song = PLAYLIST[state.nttIndex] || PLAYLIST[0];
+    document.getElementById('ntt-song').textContent =
+      (state.nttIndex + 1) + '. ' + song.title + (song.artist ? ' — ' + song.artist : '');
+    const teams = document.getElementById('ntt-teams');
+    teams.innerHTML = ['A', 'B', 'C'].map((t) => teamRowHTML('ntt', t, state.nttScores[t])).join('');
+    bindTeamButtons('ntt', state.nttScores, () => {
+      saveState();
+      renderNTT();
+    });
+    if (nttBuzzed) {
+      const br = document.getElementById('ntt-buzzed');
+      br.textContent = 'Team ' + nttBuzzed + ' buzzed!';
+      br.classList.remove('hidden');
+    }
+  }
+
+  function teamRowHTML(prefix, team, score) {
+    return (
+      '<div class="team-row" data-team="' + team + '">' +
+      '<span class="team-name">Team ' + team + '</span>' +
+      '<button type="button" class="btn circle" data-act="minus" data-team="' + team + '" aria-label="Minus">−</button>' +
+      '<span class="team-score">' + score + '</span>' +
+      '<button type="button" class="btn circle" data-act="plus" data-team="' + team + '" aria-label="Plus">+</button>' +
+      '</div>'
+    );
+  }
+
+  function bindTeamButtons(prefix, scoresObj, onChange) {
+    const root = document.getElementById(prefix === 'ntt' ? 'ntt-teams' : 'trivia-teams');
+    root.querySelectorAll('[data-act]').forEach((btn) => {
+      btn.onclick = () => {
+        const t = btn.getAttribute('data-team');
+        const act = btn.getAttribute('data-act');
+        if (act === 'plus') scoresObj[t] = (scoresObj[t] || 0) + 1;
+        else scoresObj[t] = Math.max(0, (scoresObj[t] || 0) - 1);
+        onChange();
+      };
+    });
+  }
+
+  /* —— Lyrics cues —— */
+  function renderLyrics() {
+    const song = PLAYLIST[state.lyricIndex] || PLAYLIST[0];
+    const cue = LYRIC_CUES[song.id] || LYRIC_CUES[1];
+    document.getElementById('lyric-song').textContent =
+      (state.lyricIndex + 1) + '. ' + song.title + (song.artist ? ' — ' + song.artist : '');
+    document.getElementById('lyric-steps').innerHTML =
+      '<div class="cue-step play"><span class="step-num">1</span>PLAY — ' + escapeHtml(cue.play) + '</div>' +
+      '<div class="cue-step mute"><span class="step-num">2</span>MUTE NOW — ' + escapeHtml(cue.mute) + '</div>' +
+      '<div class="cue-step kids"><span class="step-num">3</span>KIDS FINISH — ' + escapeHtml(cue.kids) + '</div>';
+  }
+
+  /* —— Freeze —— */
+  function renderFreeze() {
+    document.getElementById('freeze-count').textContent = state.freezeCount;
+    const links = document.getElementById('freeze-links');
+    if (links) {
+      links.innerHTML = PLAYLIST.slice(0, 4).map((s, i) =>
+        '<button type="button" class="music-link" data-index="' + i + '">' + escapeHtml(s.title) + '</button>'
+      ).join('');
+      links.querySelectorAll('[data-index]').forEach((btn) => {
+        btn.onclick = () => {
+          loadTrack(Number(btn.dataset.index), true);
+          musicPlay();
+        };
+      });
+    }
+  }
+
+  function setFreezeMode(mode) {
+    const el = document.getElementById('freeze-status');
+    el.classList.remove('frozen', 'pulse');
+    void el.offsetWidth;
+    el.classList.add('pulse');
+    if (mode === 'dance') {
+      el.textContent = '💃 DANCE!';
+      el.classList.remove('frozen');
+      musicUnmute();
+      musicPlay();
+    } else {
+      el.textContent = '❄️ FREEZE!';
+      el.classList.add('frozen');
+      musicPause();
+      tryVibrate(80);
+    }
+  }
+
+  /* —— Quizmaster —— */
+  function renderQM() {
+    const roster = state.qmRoster.length ? state.qmRoster : DEFAULT_STATE.qmRoster;
+    if (state.qmIndex >= roster.length) state.qmIndex = 0;
+    document.getElementById('qm-name').textContent = roster[state.qmIndex] || 'Alison 👑';
+    document.getElementById('qm-roster').value = roster.join('\n');
+  }
+
+  /* —— Trivia —— */
+  function renderTrivia() {
+    const teams = document.getElementById('trivia-teams');
+    teams.innerHTML = ['A', 'B', 'C'].map((t) => teamRowHTML('trivia', t, state.triviaScores[t])).join('');
+    bindTeamButtons('trivia', state.triviaScores, () => {
+      saveState();
+      renderTrivia();
+    });
+  }
+
+  /* —— Timers —— */
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function renderTimer() {
+    document.getElementById('timer-display').textContent = formatTime(timerLeft);
+    document.querySelectorAll('.timer-preset').forEach((b) => {
+      b.classList.toggle('active', Number(b.dataset.sec) === timerSec);
+    });
+  }
+
+  function stopTimerInterval() {
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+    timerRunning = false;
+  }
+
+  function tryVibrate(ms) {
+    try {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    } catch (_) {}
+  }
+
+  /* —— Wipe countdown —— */
+  function runWipe() {
+    const el = document.getElementById('wipe-display');
+    clearTimeout(wipeTimer);
+    const steps = ['3', '2', '1', 'SHOW! 🎉'];
+    let i = 0;
+    function tick() {
+      el.textContent = steps[i];
+      el.classList.remove('pulse');
+      void el.offsetWidth;
+      el.classList.add('pulse');
+      tryVibrate(i === 3 ? [40, 40, 80] : 40);
+      i += 1;
+      if (i < steps.length) wipeTimer = setTimeout(tick, 900);
+    }
+    tick();
+  }
+
+  /* —— Hot potato —— */
+  function startPotato() {
+    clearPotato();
+    const secs = 8 + Math.floor(Math.random() * 18); // 8–25
+    potatoDeadline = Date.now() + secs * 1000;
+    const status = document.getElementById('potato-status');
+    status.textContent = '🥔 Pass it!';
+    status.classList.remove('stopped');
+    document.getElementById('potato-timer').textContent = 'Music on (~' + secs + 's)';
+    musicUnmute();
+    musicPlay();
+    potatoTick = setInterval(updatePotatoClock, 200);
+    potatoTimer = setTimeout(stopPotato, secs * 1000);
+  }
+
+  function updatePotatoClock() {
+    const left = Math.max(0, Math.ceil((potatoDeadline - Date.now()) / 1000));
+    document.getElementById('potato-timer').textContent = left + 's left (secret-ish)';
+  }
+
+  function stopPotato() {
+    clearInterval(potatoTick);
+    potatoTick = null;
+    clearTimeout(potatoTimer);
+    potatoTimer = null;
+    const status = document.getElementById('potato-status');
+    status.textContent = '🛑 STOP! Winner / Out!';
+    status.classList.add('stopped', 'pulse');
+    document.getElementById('potato-timer').textContent = 'Music paused — who’s holding it?';
+    musicPause();
+    tryVibrate([100, 50, 100, 50, 200]);
+  }
+
+  function clearPotato() {
+    clearTimeout(potatoTimer);
+    clearInterval(potatoTick);
+    potatoTimer = null;
+    potatoTick = null;
+  }
+
+  function resetPotato() {
+    clearPotato();
+    const status = document.getElementById('potato-status');
+    status.textContent = '🥔 Pass it!';
+    status.classList.remove('stopped');
+    document.getElementById('potato-timer').textContent = '—';
+  }
+
+  /* —— Wire events —— */
+  function bind() {
+    document.querySelectorAll('[data-view]').forEach((el) => {
+      el.addEventListener('click', () => showView(el.getAttribute('data-view')));
+    });
+
+    document.getElementById('btn-reset-scores').addEventListener('click', () => {
+      if (!confirm('Reset all scores and counts?')) return;
+      const keepMusic = state.musicIndex;
+      state = structuredClone(DEFAULT_STATE);
+      state.musicIndex = keepMusic;
+      saveState();
+      nttBuzzed = null;
+      toast('Scores reset');
+      renderPlaylist();
+      updateMiniUI();
+    });
+
+    /* Mini player */
+    document.getElementById('mini-play').addEventListener('click', musicTogglePlay);
+    document.getElementById('mini-mute').addEventListener('click', musicToggleMute);
+    document.getElementById('mini-prev').addEventListener('click', () => {
+      loadTrack(state.musicIndex - 1, true);
+      musicPlay();
+    });
+    document.getElementById('mini-next').addEventListener('click', () => {
+      loadTrack(state.musicIndex + 1, true);
+      musicPlay();
+    });
+
+    /* NTT */
+    function setBuzz(t) {
+      if (nttBuzzed) {
+        toast('Already buzzed — clear first');
+        return;
+      }
+      nttBuzzed = t;
+      document.getElementById('ntt-buzzed').textContent = 'Team ' + t + ' buzzed!';
+      document.getElementById('ntt-buzzed').classList.remove('hidden');
+      document.querySelectorAll('#ntt-teams .team-row').forEach((row) => {
+        row.classList.toggle('winner', row.getAttribute('data-team') === t);
+      });
+      document.querySelectorAll('.team-buzz').forEach((b) => {
+        b.disabled = true;
+      });
+      tryVibrate(60);
+    }
+
+    document.querySelectorAll('.team-buzz').forEach((btn) => {
+      btn.addEventListener('click', () => setBuzz(btn.getAttribute('data-team')));
+    });
+
+    document.getElementById('ntt-clear-buzz').addEventListener('click', () => {
+      nttBuzzed = null;
+      document.getElementById('ntt-buzzed').classList.add('hidden');
+      document.querySelectorAll('#ntt-teams .team-row').forEach((r) => r.classList.remove('winner'));
+      document.querySelectorAll('.team-buzz').forEach((b) => { b.disabled = false; });
+    });
+
+    function clearBuzzUI() {
+      nttBuzzed = null;
+      document.getElementById('ntt-buzzed').classList.add('hidden');
+      document.querySelectorAll('#ntt-teams .team-row').forEach((r) => r.classList.remove('winner'));
+      document.querySelectorAll('.team-buzz').forEach((b) => { b.disabled = false; });
+    }
+
+    document.getElementById('ntt-next').addEventListener('click', () => {
+      state.nttIndex = (state.nttIndex + 1) % PLAYLIST.length;
+      clearBuzzUI();
+      saveState();
+      renderNTT();
+      loadTrack(state.nttIndex, true);
+      musicPlay();
+    });
+    document.getElementById('ntt-prev').addEventListener('click', () => {
+      state.nttIndex = (state.nttIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
+      clearBuzzUI();
+      saveState();
+      renderNTT();
+      loadTrack(state.nttIndex, true);
+      musicPlay();
+    });
+    document.getElementById('ntt-play').addEventListener('click', () => {
+      loadTrack(state.nttIndex, true);
+      musicUnmute();
+      musicPlay();
+    });
+    document.getElementById('ntt-pause').addEventListener('click', () => {
+      musicPause();
+    });
+
+    /* Wipe */
+    document.getElementById('wipe-go').addEventListener('click', runWipe);
+    document.getElementById('wipe-reset').addEventListener('click', () => {
+      clearTimeout(wipeTimer);
+      document.getElementById('wipe-display').textContent = 'Ready';
+    });
+
+    /* Lyrics */
+    document.getElementById('lyric-next').addEventListener('click', () => {
+      state.lyricIndex = (state.lyricIndex + 1) % PLAYLIST.length;
+      saveState();
+      renderLyrics();
+      loadTrack(state.lyricIndex, true);
+      musicUnmute();
+      musicPlay();
+    });
+    document.getElementById('lyric-prev').addEventListener('click', () => {
+      state.lyricIndex = (state.lyricIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
+      saveState();
+      renderLyrics();
+      loadTrack(state.lyricIndex, false);
+    });
+    document.getElementById('lyric-play').addEventListener('click', () => {
+      loadTrack(state.lyricIndex, true);
+      musicUnmute();
+      musicPlay();
+    });
+    document.getElementById('lyric-mute').addEventListener('click', () => {
+      musicMute();
+      toast('MUTED — kids finish the line!');
+      tryVibrate(50);
+    });
+    document.getElementById('lyric-unmute').addEventListener('click', () => {
+      musicUnmute();
+    });
+
+    /* Freeze */
+    document.getElementById('freeze-play').addEventListener('click', () => setFreezeMode('dance'));
+    document.getElementById('freeze-pause').addEventListener('click', () => setFreezeMode('freeze'));
+    document.getElementById('freeze-plus').addEventListener('click', () => {
+      state.freezeCount += 1;
+      saveState();
+      renderFreeze();
+    });
+    document.getElementById('freeze-minus').addEventListener('click', () => {
+      state.freezeCount = Math.max(0, state.freezeCount - 1);
+      saveState();
+      renderFreeze();
+    });
+    document.getElementById('freeze-elim').addEventListener('click', () => {
+      state.freezeCount = Math.max(0, state.freezeCount - 1);
+      saveState();
+      renderFreeze();
+      toast('Eliminated! Still in: ' + state.freezeCount);
+      tryVibrate(40);
+    });
+    document.getElementById('freeze-reset-count').addEventListener('click', () => {
+      state.freezeCount = 12;
+      saveState();
+      renderFreeze();
+    });
+
+    /* Potato */
+    document.getElementById('potato-start').addEventListener('click', startPotato);
+    document.getElementById('potato-stop').addEventListener('click', stopPotato);
+    document.getElementById('potato-reset').addEventListener('click', resetPotato);
+
+    /* Quizmaster */
+    document.getElementById('qm-next').addEventListener('click', () => {
+      const roster = state.qmRoster.length ? state.qmRoster : DEFAULT_STATE.qmRoster;
+      state.qmIndex = (state.qmIndex + 1) % roster.length;
+      saveState();
+      renderQM();
+      tryVibrate(30);
+    });
+    document.getElementById('qm-save').addEventListener('click', () => {
+      const lines = document.getElementById('qm-roster').value
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean);
+      if (!lines.length) {
+        toast('Add at least one name');
+        return;
+      }
+      state.qmRoster = lines;
+      state.qmIndex = 0;
+      saveState();
+      renderQM();
+      toast('Roster saved');
+    });
+
+    /* Trivia reset */
+    document.getElementById('trivia-reset').addEventListener('click', () => {
+      state.triviaScores = { A: 0, B: 0, C: 0 };
+      saveState();
+      renderTrivia();
+      toast('Trivia scores cleared');
+    });
+
+    /* Timers */
+    document.querySelectorAll('.timer-preset').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        stopTimerInterval();
+        timerSec = Number(btn.dataset.sec);
+        timerLeft = timerSec;
+        document.getElementById('timer-done').classList.add('hidden');
+        renderTimer();
+      });
+    });
+    document.getElementById('timer-start').addEventListener('click', () => {
+      if (timerRunning) return;
+      if (timerLeft <= 0) timerLeft = timerSec;
+      document.getElementById('timer-done').classList.add('hidden');
+      timerRunning = true;
+      timerId = setInterval(() => {
+        timerLeft -= 1;
+        renderTimer();
+        if (timerLeft <= 0) {
+          stopTimerInterval();
+          timerLeft = 0;
+          renderTimer();
+          document.getElementById('timer-done').classList.remove('hidden');
+          tryVibrate([200, 100, 200]);
+          toast("Time's up!");
+        }
+      }, 1000);
+    });
+    document.getElementById('timer-pause').addEventListener('click', () => {
+      stopTimerInterval();
+    });
+    document.getElementById('timer-reset').addEventListener('click', () => {
+      stopTimerInterval();
+      timerLeft = timerSec;
+      document.getElementById('timer-done').classList.add('hidden');
+      renderTimer();
+    });
+  }
+
+  /* Service worker */
+  function registerSW() {
+    if (!('serviceWorker' in navigator)) return;
+    if (location.protocol === 'file:') return;
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+
+  /* Init */
+  renderPlaylist();
+  updateMiniUI();
+  bind();
+  initYouTube();
+  registerSW();
+})();
+
+  </script>
+</body>
+</html>
