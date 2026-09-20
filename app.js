@@ -175,6 +175,7 @@
   let musicPlaying = false;
   let pendingPlay = false;
   let freezePlayGuardUntil = 0;
+  let warnedYtAds = false;
   let lastYtStartSeconds = 0;
   /** @type {HTMLAudioElement|null} */
   let htmlAudio = null;
@@ -276,6 +277,10 @@
           if (st !== 1) playYtNudge();
         } catch (_) { playYtNudge(); }
       }, 300);
+      if (!warnedYtAds && Object.keys(localTracks).length === 0) {
+        warnedYtAds = true;
+        toast('YouTube may show ads — Load my song files for ad-free');
+      }
       return true;
     } catch (e) {
       toast('Could not load track');

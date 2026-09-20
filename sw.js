@@ -1,5 +1,5 @@
 /* Alison Party Host — offline cache for Add to Home Screen */
-const CACHE = 'alison-party-v13';
+const CACHE = 'alison-party-v14';
 const ASSETS = [
   './',
   './index.html',

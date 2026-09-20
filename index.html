@@ -470,20 +470,26 @@ body {
   background: linear-gradient(135deg, var(--pink-hot), var(--lilac-deep));
   box-shadow: var(--shadow);
 }
-.yt-frame {
-  /* In-viewport audio surface — iOS/Chrome pause fully hidden players after ~0.5s */
+.yt-shell {
+  /* In-viewport so iOS won't kill audio; cover hides ad video */
   position: fixed;
   right: 8px;
   bottom: calc(88px + env(safe-area-inset-bottom, 0px));
   width: 160px;
   height: 90px;
-  opacity: 0.2;
   z-index: 85;
   pointer-events: none;
-  overflow: hidden;
-  border: 0;
   border-radius: 10px;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(74, 20, 140, 0.25);
+}
+.yt-frame {
+  position: absolute;
+  inset: 0;
+  width: 160px;
+  height: 90px;
+  opacity: 1;
+  border: 0;
   background: #000;
 }
 .yt-frame iframe {
@@ -491,6 +497,16 @@ body {
   height: 90px !important;
   border: 0;
   pointer-events: none;
+}
+.yt-cover {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.75rem;
+  background: linear-gradient(135deg, #e91e8c, #9b7ec8);
+  color: #fff;
+  z-index: 2;
 }
 .mini-main {
   flex: 1;
@@ -927,11 +943,11 @@ textarea {
       </div>
 
       <div class="card local-audio-card">
-        <h2>My song files</h2>
-        <p class="hint" style="margin:0 0 10px">Optional: load purchased tracks. Prefer over YouTube. Name like <code>01-choosing-texas.mp3</code>.</p>
-        <label class="btn primary" for="local-audio-input">Load my song files</label>
+        <h2>Ad-free songs (recommended)</h2>
+        <p class="hint" style="margin:0 0 10px"><strong>YouTube Premium does not work inside this app</strong> (embeds can’t use your Premium login). For zero ads, load your own MP3/M4A files. Name like <code>01-choosing-texas.mp3</code>.</p>
+        <label class="btn primary" for="local-audio-input">Load my song files (no ads)</label>
         <input type="file" id="local-audio-input" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg" multiple />
-        <p id="local-audio-status">Optional: load purchased MP3/M4A files (named like 01-choosing-texas.mp3)</p>
+        <p id="local-audio-status">No local files yet — YouTube may show ads until you load songs.</p>
       </div>
 
       <nav class="game-grid" aria-label="Games">
@@ -1131,7 +1147,10 @@ textarea {
 
   <!-- Audio dock: YouTube iframe kept but visually hidden -->
   <div id="mini-player" class="mini-player" aria-label="Audio player">
-    <div id="yt-player" class="yt-frame" aria-hidden="true"></div>
+    <div class="yt-shell" aria-hidden="true">
+      <div id="yt-player" class="yt-frame"></div>
+      <div class="yt-cover">🎂</div>
+    </div>
     <div class="mini-main">
       <p id="mini-song-title" class="mini-song-title">1. Choosin' Texas — Ella Langley</p>
       <span id="audio-source-badge">YouTube audio</span>
@@ -1323,6 +1342,7 @@ textarea {
   let musicPlaying = false;
   let pendingPlay = false;
   let freezePlayGuardUntil = 0;
+  let warnedYtAds = false;
   let lastYtStartSeconds = 0;
   /** @type {HTMLAudioElement|null} */
   let htmlAudio = null;
@@ -1424,6 +1444,10 @@ textarea {
           if (st !== 1) playYtNudge();
         } catch (_) { playYtNudge(); }
       }, 300);
+      if (!warnedYtAds && Object.keys(localTracks).length === 0) {
+        warnedYtAds = true;
+        toast('YouTube may show ads — Load my song files for ad-free');
+      }
       return true;
     } catch (e) {
       toast('Could not load track');

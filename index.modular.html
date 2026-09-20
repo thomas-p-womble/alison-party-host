@@ -34,11 +34,11 @@
       </div>
 
       <div class="card local-audio-card">
-        <h2>My song files</h2>
-        <p class="hint" style="margin:0 0 10px">Optional: load purchased tracks. Prefer over YouTube. Name like <code>01-choosing-texas.mp3</code>.</p>
-        <label class="btn primary" for="local-audio-input">Load my song files</label>
+        <h2>Ad-free songs (recommended)</h2>
+        <p class="hint" style="margin:0 0 10px"><strong>YouTube Premium does not work inside this app</strong> (embeds can’t use your Premium login). For zero ads, load your own MP3/M4A files. Name like <code>01-choosing-texas.mp3</code>.</p>
+        <label class="btn primary" for="local-audio-input">Load my song files (no ads)</label>
         <input type="file" id="local-audio-input" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg" multiple />
-        <p id="local-audio-status">Optional: load purchased MP3/M4A files (named like 01-choosing-texas.mp3)</p>
+        <p id="local-audio-status">No local files yet — YouTube may show ads until you load songs.</p>
       </div>
 
       <nav class="game-grid" aria-label="Games">
@@ -238,7 +238,10 @@
 
   <!-- Audio dock: YouTube iframe kept but visually hidden -->
   <div id="mini-player" class="mini-player" aria-label="Audio player">
-    <div id="yt-player" class="yt-frame" aria-hidden="true"></div>
+    <div class="yt-shell" aria-hidden="true">
+      <div id="yt-player" class="yt-frame"></div>
+      <div class="yt-cover">🎂</div>
+    </div>
     <div class="mini-main">
       <p id="mini-song-title" class="mini-song-title">1. Choosin' Texas — Ella Langley</p>
       <span id="audio-source-badge">YouTube audio</span>

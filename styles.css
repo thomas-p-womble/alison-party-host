@@ -454,20 +454,26 @@ body {
   background: linear-gradient(135deg, var(--pink-hot), var(--lilac-deep));
   box-shadow: var(--shadow);
 }
-.yt-frame {
-  /* In-viewport audio surface — iOS/Chrome pause fully hidden players after ~0.5s */
+.yt-shell {
+  /* In-viewport so iOS won't kill audio; cover hides ad video */
   position: fixed;
   right: 8px;
   bottom: calc(88px + env(safe-area-inset-bottom, 0px));
   width: 160px;
   height: 90px;
-  opacity: 0.2;
   z-index: 85;
   pointer-events: none;
-  overflow: hidden;
-  border: 0;
   border-radius: 10px;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(74, 20, 140, 0.25);
+}
+.yt-frame {
+  position: absolute;
+  inset: 0;
+  width: 160px;
+  height: 90px;
+  opacity: 1;
+  border: 0;
   background: #000;
 }
 .yt-frame iframe {
@@ -475,6 +481,16 @@ body {
   height: 90px !important;
   border: 0;
   pointer-events: none;
+}
+.yt-cover {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.75rem;
+  background: linear-gradient(135deg, #e91e8c, #9b7ec8);
+  color: #fff;
+  z-index: 2;
 }
 .mini-main {
   flex: 1;
