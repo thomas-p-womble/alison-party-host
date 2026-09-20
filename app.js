@@ -20,18 +20,35 @@
 
   /* Hot Potato / Prize Pass — separate tween playlist (NOT Music Game nine). Prefer Topic / Official Audio. */
   const POTATO_PLAYLIST = [
-    { id: 'p1', title: 'Espresso', artist: 'Sabrina Carpenter', youtubeId: '51zjlMhdSTE' },
-    { id: 'p2', title: 'HOT TO GO!', artist: 'Chappell Roan', youtubeId: 'GJAt8bqW00E' },
-    { id: 'p3', title: 'APT.', artist: 'ROSÉ & Bruno Mars', youtubeId: '8Ebqe2Dbzls' },
-    { id: 'p4', title: 'Birds of a Feather', artist: 'Billie Eilish', youtubeId: 'd5gf9dXbPi0' },
-    { id: 'p5', title: 'Dance the Night', artist: 'Dua Lipa', youtubeId: 'OiC1rgCPmUQ' },
-    { id: 'p6', title: 'Levitating', artist: 'Dua Lipa', youtubeId: 'OsfAnsMY21M' },
-    { id: 'p7', title: 'Sunroof', artist: 'Nicky Youre / dazy', youtubeId: 'eZCWyFNV_ZM' },
-    { id: 'p8', title: 'Dynamite', artist: 'BTS', youtubeId: 'NvK9APEhcdk' },
-    { id: 'p9', title: 'As It Was', artist: 'Harry Styles', youtubeId: 'wa5gkHMqbls' },
-    { id: 'p10', title: 'Cruel Summer', artist: 'Taylor Swift', youtubeId: 'ic8j13piAhQ' },
-    { id: 'p11', title: 'Flowers', artist: 'Miley Cyrus', youtubeId: 'BkSSOGNeWTM' },
-    { id: 'p12', title: 'What Makes You Beautiful', artist: 'One Direction', youtubeId: 'd57qSDCxVA4' }
+    { id: 'p1', title: 'Espresso', artist: 'Sabrina Carpenter', youtubeId: '51zjlMhdSTE', startBias: [20, 55] },
+    { id: 'p2', title: 'HOT TO GO!', artist: 'Chappell Roan', youtubeId: 'GJAt8bqW00E', startBias: [15, 50] },
+    { id: 'p3', title: 'APT.', artist: 'ROSÉ & Bruno Mars', youtubeId: '8Ebqe2Dbzls', startBias: [20, 55] },
+    { id: 'p4', title: 'Birds of a Feather', artist: 'Billie Eilish', youtubeId: 'd5gf9dXbPi0', startBias: [25, 60] },
+    { id: 'p5', title: 'Dance the Night', artist: 'Dua Lipa', youtubeId: 'OiC1rgCPmUQ', startBias: [20, 55] },
+    { id: 'p6', title: 'Levitating', artist: 'Dua Lipa', youtubeId: 'OsfAnsMY21M', startBias: [25, 60] },
+    { id: 'p7', title: 'Sunroof', artist: 'Nicky Youre / dazy', youtubeId: 'eZCWyFNV_ZM', startBias: [20, 50] },
+    { id: 'p8', title: 'Dynamite', artist: 'BTS', youtubeId: 'NvK9APEhcdk', startBias: [15, 50] },
+    { id: 'p9', title: 'As It Was', artist: 'Harry Styles', youtubeId: 'wa5gkHMqbls', startBias: [20, 55] },
+    { id: 'p10', title: 'Cruel Summer', artist: 'Taylor Swift', youtubeId: 'ic8j13piAhQ', startBias: [25, 60] },
+    { id: 'p11', title: 'Flowers', artist: 'Miley Cyrus', youtubeId: 'BkSSOGNeWTM', startBias: [20, 55] },
+    { id: 'p12', title: 'What Makes You Beautiful', artist: 'One Direction', youtubeId: 'd57qSDCxVA4', startBias: [20, 50] }
+  ];
+
+  /* Freeze Dance — separate tween playlist (NOT Music Game nine, NOT potato twelve). Prefer Topic / Official Audio. */
+  /* youtubeIds oEmbed-verified 2026-09-20 */
+  const FREEZE_PLAYLIST = [
+    { id: 'f1', title: 'Anti-Hero', artist: 'Taylor Swift', youtubeId: 'b1kbLwvqugk', startBias: [25, 55] },
+    { id: 'f2', title: 'Blank Space', artist: 'Taylor Swift', youtubeId: 'e-ORhEE9VVg', startBias: [20, 50] },
+    { id: 'f3', title: 'Style', artist: 'Taylor Swift', youtubeId: '-CmadmM5cOk', startBias: [20, 55] },
+    { id: 'f4', title: 'Butter', artist: 'BTS', youtubeId: 'WMweEpGlu_U', startBias: [15, 45] },
+    { id: 'f5', title: 'Uptown Funk', artist: 'Mark Ronson / Bruno Mars', youtubeId: 'OPf0YbXqDm0', startBias: [20, 50] },
+    { id: 'f6', title: "Can't Stop the Feeling!", artist: 'Justin Timberlake', youtubeId: 'ru0K8uYEZWw', startBias: [15, 45] },
+    { id: 'f7', title: 'Happy', artist: 'Pharrell Williams', youtubeId: 'ZbZSe6N_BXs', startBias: [20, 55] },
+    { id: 'f8', title: 'Treasure', artist: 'Bruno Mars', youtubeId: 'nPvuNsRccVw', startBias: [20, 50] },
+    { id: 'f9', title: 'Watermelon Sugar', artist: 'Harry Styles', youtubeId: 'E07s5ZYygMg', startBias: [15, 45] },
+    { id: 'f10', title: 'good 4 u', artist: 'Olivia Rodrigo', youtubeId: 'gNi_6U5Pm_o', startBias: [15, 40] },
+    { id: 'f11', title: 'September', artist: 'Earth, Wind & Fire', youtubeId: 'Gs069dndIYk', startBias: [20, 55] },
+    { id: 'f12', title: 'Shut Up and Dance', artist: 'WALK THE MOON', youtubeId: 'nbcCG7PkI18', startBias: [15, 45] }
   ];
 
   /* Host timing cards only — NO full copyrighted lyrics */
@@ -138,6 +155,12 @@
   let potatoOrderIdx = 0;
   let potatoSavedMusicIndex = null;
   let potatoRoundActive = false;
+  let freezeMode = false;
+  let freezeSong = null;
+  let freezeOrder = [];
+  let freezeOrderIdx = 0;
+  let freezeSavedMusicIndex = null;
+  let freezeIndex = 0;
   let timerSec = 60;
   let timerLeft = 60;
   let timerId = null;
@@ -201,7 +224,24 @@
 
   function activePlaybackSong() {
     if (potatoMode && potatoSong) return potatoSong;
+    if (freezeMode && freezeSong) return freezeSong;
     return currentSong();
+  }
+
+  /** Random energetic offset (seconds) for potato/freeze mid-song starts. */
+  function energeticStartSeconds(song) {
+    if (song && Array.isArray(song.startBias) && song.startBias.length >= 2) {
+      const lo = Number(song.startBias[0]);
+      const hi = Number(song.startBias[1]);
+      if (Number.isFinite(lo) && Number.isFinite(hi) && hi > lo) {
+        return Math.round(lo + Math.random() * (hi - lo));
+      }
+    }
+    if (song && typeof song.startBias === 'number' && song.startBias > 0) {
+      return Math.round(song.startBias);
+    }
+    // Default: ~15–45% of a typical ~3:20 tween hit → ~20–60s, varies each round
+    return Math.round(20 + Math.random() * 40);
   }
 
   function songLabel(song, index) {
@@ -214,6 +254,8 @@
     if (titleEl) {
       if (potatoMode && potatoSong) {
         titleEl.textContent = '🥔 ' + potatoSong.title + (potatoSong.artist ? ' — ' + potatoSong.artist : '');
+      } else if (freezeMode && freezeSong) {
+        titleEl.textContent = '❄️ ' + freezeSong.title + (freezeSong.artist ? ' — ' + freezeSong.artist : '');
       } else {
         const src = hasLocal(song) ? ' · local' : '';
         titleEl.textContent = songLabel(song, state.musicIndex) + src;
@@ -635,13 +677,18 @@
   function showView(id) {
     const leavingPotato = id !== 'potato' && potatoMode;
     if (leavingPotato) leavePotatoView();
+    const leavingFreeze = id !== 'freeze' && freezeMode;
+    if (leavingFreeze) leaveFreezeView();
     document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
     const view = document.getElementById('view-' + id);
     if (view) view.classList.add('active');
     window.scrollTo(0, 0);
     if (id === 'name-tune') renderNTT();
     if (id === 'lyrics') renderLyrics();
-    if (id === 'freeze') renderFreeze();
+    if (id === 'freeze') {
+      enterFreezeMode();
+      renderFreeze();
+    }
     if (id === 'quizmaster') renderQM();
     if (id === 'trivia') renderTrivia();
     if (id === 'timers') renderTimer();
@@ -741,18 +788,107 @@
     updateLyricMuteUI();
   }
 
-  /* —— Freeze —— */
+  /* —— Freeze Dance (separate tween playlist) —— */
+  function shuffleFreezeOrder() {
+    freezeOrder = FREEZE_PLAYLIST.map((_, i) => i);
+    for (let i = freezeOrder.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = freezeOrder[i];
+      freezeOrder[i] = freezeOrder[j];
+      freezeOrder[j] = tmp;
+    }
+    freezeOrderIdx = 0;
+  }
+
+  function nextFreezeSong() {
+    if (!freezeOrder.length || freezeOrderIdx >= freezeOrder.length) {
+      shuffleFreezeOrder();
+    }
+    const song = FREEZE_PLAYLIST[freezeOrder[freezeOrderIdx]];
+    freezeOrderIdx += 1;
+    freezeIndex = freezeOrder[freezeOrderIdx - 1];
+    return song;
+  }
+
+  function enterFreezeMode() {
+    if (!freezeMode) {
+      freezeSavedMusicIndex = state.musicIndex;
+      freezeMode = true;
+      if (!freezeOrder.length) shuffleFreezeOrder();
+    }
+  }
+
+  function loadFreezeVideo(song, autoplay, startSeconds) {
+    freezeSong = song;
+    usingLocal = false;
+    pauseHtmlAudio();
+    updateMiniUI();
+    const startAt = typeof startSeconds === 'number' ? startSeconds : energeticStartSeconds(song);
+    if (!musicReady || !ytPlayer) {
+      if (autoplay) pendingPlay = true;
+      toast('Loading audio… tap PLAY again in a sec');
+      return false;
+    }
+    try {
+      if (autoplay) {
+        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: startAt });
+        pendingPlay = true;
+      } else {
+        ytPlayer.cueVideoById({ videoId: song.youtubeId, startSeconds: startAt });
+      }
+      return true;
+    } catch (e) {
+      toast('Could not load freeze track');
+      return false;
+    }
+  }
+
+  function leaveFreezeView() {
+    const wasMode = freezeMode;
+    freezeMode = false;
+    freezeSong = null;
+    musicPause();
+    if (wasMode && freezeSavedMusicIndex != null) {
+      loadTrack(freezeSavedMusicIndex, false);
+    }
+    freezeSavedMusicIndex = null;
+    updateMiniUI();
+  }
+
   function renderFreeze() {
     document.getElementById('freeze-count').textContent = state.freezeCount;
     const links = document.getElementById('freeze-links');
     if (links) {
-      links.innerHTML = PLAYLIST.slice(0, 4).map((s, i) =>
-        '<button type="button" class="music-link" data-index="' + i + '">' + escapeHtml(s.title) + '</button>'
+      links.innerHTML = FREEZE_PLAYLIST.map((s, i) =>
+        '<button type="button" class="music-link" data-freeze-index="' + i + '">' + escapeHtml(s.title) + '</button>'
       ).join('');
-      links.querySelectorAll('[data-index]').forEach((btn) => {
+      links.querySelectorAll('[data-freeze-index]').forEach((btn) => {
         btn.onclick = () => {
-          loadTrack(Number(btn.dataset.index), true);
-          musicPlay();
+          enterFreezeMode();
+          const idx = Number(btn.dataset.freezeIndex);
+          const song = FREEZE_PLAYLIST[idx];
+          if (!song) return;
+          freezeIndex = idx;
+          const startAt = energeticStartSeconds(song);
+          loadFreezeVideo(song, true, startAt);
+          musicUnmute();
+          try {
+            if (ytPlayer && musicReady) {
+              ytPlayer.playVideo();
+              ytPlayer.unMute();
+              musicPlaying = true;
+              updateMiniUI();
+            } else {
+              musicPlay();
+            }
+          } catch (_) {
+            musicPlay();
+          }
+          const el = document.getElementById('freeze-status');
+          if (el) {
+            el.textContent = '💃 DANCE!';
+            el.classList.remove('frozen');
+          }
         };
       });
     }
@@ -766,8 +902,23 @@
     if (mode === 'dance') {
       el.textContent = '💃 DANCE!';
       el.classList.remove('frozen');
+      enterFreezeMode();
+      const song = nextFreezeSong();
+      const startAt = energeticStartSeconds(song);
+      loadFreezeVideo(song, true, startAt);
       musicUnmute();
-      musicPlay();
+      try {
+        if (ytPlayer && musicReady) {
+          ytPlayer.playVideo();
+          ytPlayer.unMute();
+          musicPlaying = true;
+          updateMiniUI();
+        } else {
+          musicPlay();
+        }
+      } catch (_) {
+        musicPlay();
+      }
     } else {
       el.textContent = '❄️ FREEZE!';
       el.classList.add('frozen');
@@ -896,12 +1047,13 @@
     }
   }
 
-  function loadPotatoVideo(song, autoplay) {
+  function loadPotatoVideo(song, autoplay, startSeconds) {
     potatoSong = song;
     usingLocal = false;
     pauseHtmlAudio();
     updateMiniUI();
     updatePotatoSongLabel();
+    const startAt = typeof startSeconds === 'number' ? startSeconds : energeticStartSeconds(song);
     if (!musicReady || !ytPlayer) {
       if (autoplay) pendingPlay = true;
       toast('Loading audio… tap Start Round again in a sec');
@@ -909,10 +1061,10 @@
     }
     try {
       if (autoplay) {
-        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: 0 });
+        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: startAt });
         pendingPlay = true;
       } else {
-        ytPlayer.cueVideoById({ videoId: song.youtubeId, startSeconds: 0 });
+        ytPlayer.cueVideoById({ videoId: song.youtubeId, startSeconds: startAt });
       }
       return true;
     } catch (e) {
@@ -967,7 +1119,8 @@
     clearPotatoTimers();
     enterPotatoMode();
     const song = nextPotatoSong();
-    const secs = 8 + Math.floor(Math.random() * 15); // 8–22
+    const secs = 15 + Math.floor(Math.random() * 21); // 15–35
+    const startAt = energeticStartSeconds(song);
     potatoDeadline = Date.now() + secs * 1000;
     potatoRoundActive = true;
 
@@ -980,7 +1133,7 @@
     timerEl.textContent = 'Music on — stop is secret';
     timerEl.classList.remove('flash-stop');
 
-    loadPotatoVideo(song, true);
+    loadPotatoVideo(song, true, startAt);
     musicUnmute();
     // Ensure play after load
     try {

@@ -65,8 +65,8 @@ Audio dock: **Play/Pause · Mute/Unmute · Prev/Next · title**. Games use the s
 | **Name That Tune** | Teams A/B/C scores, first-tap buzz, play/pause clip |
 | **3-2-1 Show** | Wipe-board reveal countdown |
 | **Sing-Along Cue** | One huge **MUTE ↔ UNMUTE** button for kids to sing the hook; Play from start + Prev/Next (no full lyrics) |
-| **Freeze Dance** | PLAY / FREEZE controls in-app music + eliminate counter |
-| **Hot Potato / Prize Pass** | Auto music from separate tween playlist; random 8–22s secret stop |
+| **Freeze Dance** | Separate tween playlist; PLAY mid-song / FREEZE pause + eliminate counter |
+| **Hot Potato / Prize Pass** | Auto music from separate tween playlist; mid-song start; random 15–35s secret stop |
 | **Alison Quizmaster** | Rotates who asks next; editable roster |
 | **Alison Quiz** | How Well Do You Know Alison? — 10 open-ended Qs + team A/B/C scores |
 | **Timers** | 1 / 3 / 5 / 10 minute presets |
