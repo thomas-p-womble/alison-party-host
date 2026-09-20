@@ -571,6 +571,69 @@ body {
 .cue-step.mute .step-num { background: #b71c1c; color: #fff; }
 .cue-step.kids .step-num { background: #e65100; color: #fff; }
 
+.mega.auto-sing {
+  background: linear-gradient(135deg, #e91e8c, #7e57c2);
+  box-shadow: 0 8px 20px rgba(233, 30, 140, 0.35);
+}
+.mega.auto-sing.running {
+  animation: autoPulse 1.2s ease-in-out infinite;
+}
+@keyframes autoPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 8px 20px rgba(233, 30, 140, 0.35); }
+  50% { transform: scale(1.02); box-shadow: 0 10px 28px rgba(126, 87, 194, 0.5); }
+}
+
+.lyric-countdown {
+  margin: 10px 0 4px;
+  min-height: 1.6em;
+  font-size: 1.25rem;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.lyric-countdown.waiting { color: #1b5e20; }
+.lyric-countdown.muted-now {
+  color: #b71c1c;
+  animation: muteFlash 0.6s ease;
+}
+.lyric-countdown.unmuted { color: #6a1b9a; }
+@keyframes muteFlash {
+  0% { transform: scale(1.15); }
+  100% { transform: none; }
+}
+
+.cue-timing {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+}
+
+.cue-step.active {
+  box-shadow: 0 0 0 3px rgba(233, 30, 140, 0.45);
+  transform: scale(1.02);
+}
+.cue-step.flash {
+  animation: cueFlash 0.7s ease;
+}
+@keyframes cueFlash {
+  0% { filter: brightness(1.25); }
+  100% { filter: none; }
+}
+.cue-step.mute.active {
+  background: #ffcdd2;
+  border-color: #c62828;
+}
+.cue-step.kids.active {
+  background: #ffe0b2;
+  border-color: #ef6c00;
+}
+.cue-step.play.active {
+  background: #c8e6c9;
+  border-color: #2e7d32;
+}
+
 /* Freeze / potato extras */
 .elim-row {
   display: flex;
@@ -738,7 +801,7 @@ textarea {
   box-shadow: 0 0 0 2px #81c784;
 }
 
-  </style>
+</style>
 </head>
 <body>
   <div id="app">
@@ -835,13 +898,15 @@ textarea {
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
         <h1>Sing-Along Cue</h1>
       </header>
-      <p class="coach">Host timing only — no full lyrics. Play → MUTE → kids finish the line.</p>
+      <p class="coach">Host timing only — no full lyrics. Auto Sing mutes &amp; unmutes on a timer; kids finish the line.</p>
       <div class="card cue-card">
         <p class="label">Song</p>
         <p id="lyric-song" class="song-title">—</p>
+        <div id="lyric-countdown" class="lyric-countdown" aria-live="polite"></div>
         <div id="lyric-steps" class="cue-steps"></div>
       </div>
       <div class="row-btns stack">
+        <button type="button" id="lyric-auto" class="mega auto-sing">🎤 Auto Sing</button>
         <button type="button" id="lyric-play" class="mega play">▶ PLAY</button>
         <button type="button" id="lyric-mute" class="mega freeze">🔇 MUTE NOW</button>
         <button type="button" id="lyric-unmute" class="btn secondary">🔊 Unmute</button>
@@ -985,51 +1050,61 @@ textarea {
   ];
 
   /* Host timing cards only — NO full copyrighted lyrics */
+  /* startAt/muteAt/unmuteAt = seconds for Auto Sing seek + mute window */
   const LYRIC_CUES = {
     1: {
       play: 'Play opening / chorus energy',
       mute: 'MUTE NOW before the big shout line',
-      kids: 'Kids finish / shout the Texas hook'
+      kids: 'Kids finish / shout the Texas hook',
+      startAt: 40, muteAt: 48, unmuteAt: 56
     },
     2: {
       play: 'Play verse → approach chorus',
       mute: 'MUTE right before “you belong…”',
-      kids: 'Kids finish the chorus line'
+      kids: 'Kids finish the chorus line',
+      startAt: 40, muteAt: 48, unmuteAt: 56
     },
     3: {
       play: 'Play until the famous “bah bah bah”',
       mute: 'MUTE — hands ready',
-      kids: 'Kids sing the bahs + “Sweet Caroline!”'
+      kids: 'Kids sing the bahs + “Sweet Caroline!”',
+      startAt: 65, muteAt: 72, unmuteAt: 84
     },
     4: {
       play: 'Play the iconic guitar riff in',
       mute: 'MUTE before the title line',
-      kids: 'Kids belt “Eye of the Tiger!”'
+      kids: 'Kids belt “Eye of the Tiger!”',
+      startAt: 45, muteAt: 52, unmuteAt: 60
     },
     5: {
       play: 'Play into the big chorus',
       mute: 'MUTE before “don’t stop…”',
-      kids: 'Kids finish “Don’t Stop Believin’!”'
+      kids: 'Kids finish “Don’t Stop Believin’!”',
+      startAt: 218, muteAt: 226, unmuteAt: 236
     },
     6: {
       play: 'Play toward the “twenty-two” hook',
       mute: 'MUTE NOW',
-      kids: 'Kids shout “22!” / finish the line'
+      kids: 'Kids shout “22!” / finish the line',
+      startAt: 38, muteAt: 45, unmuteAt: 53
     },
     7: {
       play: 'Play into the roar chorus',
       mute: 'MUTE before the roar',
-      kids: 'Kids ROAR / finish the chorus'
+      kids: 'Kids ROAR / finish the chorus',
+      startAt: 42, muteAt: 50, unmuteAt: 60
     },
     8: {
       play: 'Play into “party in the USA”',
       mute: 'MUTE NOW',
-      kids: 'Kids finish “Party in the USA!”'
+      kids: 'Kids finish “Party in the USA!”',
+      startAt: 45, muteAt: 53, unmuteAt: 63
     },
     9: {
       play: 'Play into “shake it off”',
       mute: 'MUTE before the title hook',
-      kids: 'Kids shake + finish the line'
+      kids: 'Kids shake + finish the line',
+      startAt: 42, muteAt: 50, unmuteAt: 60
     }
   };
 
@@ -1061,6 +1136,9 @@ textarea {
   let musicMuted = false;
   let musicPlaying = false;
   let pendingPlay = false;
+  let autoSingTimer = null;
+  let autoSingPhase = 'idle'; /* idle | playing | muted | done */
+  let autoSingSongId = null;
   /** @type {HTMLAudioElement|null} */
   let htmlAudio = null;
   /** song.id -> { url, name, source: 'file'|'folder' } */
@@ -1384,6 +1462,160 @@ textarea {
     else musicMute();
   }
 
+  function getMusicTime() {
+    try {
+      if (usingLocal && htmlAudio) {
+        return Number(htmlAudio.currentTime) || 0;
+      }
+      if (ytPlayer && musicReady && typeof ytPlayer.getCurrentTime === 'function') {
+        return Number(ytPlayer.getCurrentTime()) || 0;
+      }
+    } catch (_) {}
+    return 0;
+  }
+
+  function musicSeek(seconds) {
+    const t = Math.max(0, Number(seconds) || 0);
+    try {
+      if (usingLocal && htmlAudio) {
+        htmlAudio.currentTime = t;
+        return true;
+      }
+      if (ytPlayer && musicReady) {
+        ytPlayer.seekTo(t, true);
+        return true;
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  function stopAutoSing() {
+    if (autoSingTimer) {
+      clearInterval(autoSingTimer);
+      autoSingTimer = null;
+    }
+    autoSingPhase = 'idle';
+    autoSingSongId = null;
+    const cd = document.getElementById('lyric-countdown');
+    if (cd) {
+      cd.textContent = '';
+      cd.className = 'lyric-countdown';
+    }
+    document.querySelectorAll('#lyric-steps .cue-step').forEach((el) => {
+      el.classList.remove('active', 'flash');
+    });
+    const btn = document.getElementById('lyric-auto');
+    if (btn) btn.classList.remove('running');
+  }
+
+  function setCueHighlight(phase) {
+    const steps = document.getElementById('lyric-steps');
+    if (!steps) return;
+    steps.querySelectorAll('.cue-step').forEach((el) => {
+      el.classList.remove('active', 'flash');
+    });
+    let sel = null;
+    if (phase === 'playing') sel = '.cue-step.play';
+    else if (phase === 'muted') sel = '.cue-step.mute';
+    else if (phase === 'done') sel = '.cue-step.kids';
+    if (sel) {
+      const el = steps.querySelector(sel);
+      if (el) {
+        el.classList.add('active', 'flash');
+      }
+    }
+  }
+
+  function updateAutoSingCountdown(cue, t) {
+    const cd = document.getElementById('lyric-countdown');
+    if (!cd) return;
+    if (autoSingPhase === 'playing') {
+      const left = Math.max(0, Math.ceil(cue.muteAt - t));
+      cd.textContent = 'Mute in ' + left + 's';
+      cd.className = 'lyric-countdown waiting';
+    } else if (autoSingPhase === 'muted') {
+      const left = Math.max(0, Math.ceil(cue.unmuteAt - t));
+      cd.textContent = 'MUTED — kids sing (' + left + 's)';
+      cd.className = 'lyric-countdown muted-now';
+    } else if (autoSingPhase === 'done') {
+      cd.textContent = 'Unmuted';
+      cd.className = 'lyric-countdown unmuted';
+    }
+  }
+
+  function startAutoSing() {
+    stopAutoSing();
+    const song = PLAYLIST[state.lyricIndex] || PLAYLIST[0];
+    const cue = LYRIC_CUES[song.id] || LYRIC_CUES[1];
+    if (cue.startAt == null || cue.muteAt == null || cue.unmuteAt == null) {
+      toast('No auto timings for this song');
+      return;
+    }
+
+    /* Keep dock track in sync with lyric song */
+    if (state.musicIndex !== state.lyricIndex) {
+      loadTrack(state.lyricIndex, false);
+    }
+
+    autoSingSongId = song.id;
+    autoSingPhase = 'playing';
+    const btn = document.getElementById('lyric-auto');
+    if (btn) btn.classList.add('running');
+
+    musicUnmute();
+    musicSeek(cue.startAt);
+    musicPlay();
+    /* Seek again after play starts (YT sometimes ignores pre-play seek) */
+    setTimeout(() => musicSeek(cue.startAt), 120);
+    setCueHighlight('playing');
+    updateAutoSingCountdown(cue, cue.startAt);
+    toast('Auto Sing — seek to ' + cue.startAt + 's');
+    tryVibrate(30);
+
+    let didMute = false;
+    let didUnmute = false;
+    const wallStart = Date.now();
+    const startAt = cue.startAt;
+
+    function effectiveTime() {
+      const raw = getMusicTime();
+      const wall = startAt + (Date.now() - wallStart) / 1000;
+      /* Trust player time only when it looks like we landed near the cue window */
+      if (raw >= startAt - 3 && raw <= cue.unmuteAt + 8) return raw;
+      return wall;
+    }
+
+    autoSingTimer = setInterval(() => {
+      if (autoSingSongId !== song.id) {
+        stopAutoSing();
+        return;
+      }
+      const t = effectiveTime();
+      if (!didMute && t >= cue.muteAt) {
+        didMute = true;
+        autoSingPhase = 'muted';
+        musicMute();
+        setCueHighlight('muted');
+        toast('MUTED — kids finish the line!');
+        tryVibrate(50);
+      }
+      if (didMute && !didUnmute && t >= cue.unmuteAt) {
+        didUnmute = true;
+        autoSingPhase = 'done';
+        musicUnmute();
+        setCueHighlight('done');
+        toast('Unmuted — music continues!');
+        tryVibrate(30);
+        updateAutoSingCountdown(cue, t);
+        clearInterval(autoSingTimer);
+        autoSingTimer = null;
+        if (btn) btn.classList.remove('running');
+        return;
+      }
+      updateAutoSingCountdown(cue, t);
+    }, 150);
+  }
+
   function musicNext(autoplay) {
     loadTrack(state.musicIndex + 1, autoplay !== false ? musicPlaying || autoplay === true : false);
     if (autoplay === true || musicPlaying) musicPlay();
@@ -1474,6 +1706,7 @@ textarea {
   }
 
   function showView(id) {
+    if (id !== 'lyrics') stopAutoSing();
     document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
     const view = document.getElementById('view-' + id);
     if (view) view.classList.add('active');
@@ -1569,10 +1802,19 @@ textarea {
     const cue = LYRIC_CUES[song.id] || LYRIC_CUES[1];
     document.getElementById('lyric-song').textContent =
       (state.lyricIndex + 1) + '. ' + song.title + (song.artist ? ' — ' + song.artist : '');
+    const timingHint = (cue.startAt != null)
+      ? '<p class="cue-timing">Auto: seek ' + cue.startAt + 's → mute ' + cue.muteAt + 's → unmute ' + cue.unmuteAt + 's</p>'
+      : '';
     document.getElementById('lyric-steps').innerHTML =
+      timingHint +
       '<div class="cue-step play"><span class="step-num">1</span>PLAY — ' + escapeHtml(cue.play) + '</div>' +
       '<div class="cue-step mute"><span class="step-num">2</span>MUTE NOW — ' + escapeHtml(cue.mute) + '</div>' +
       '<div class="cue-step kids"><span class="step-num">3</span>KIDS FINISH — ' + escapeHtml(cue.kids) + '</div>';
+    const cd = document.getElementById('lyric-countdown');
+    if (cd && autoSingPhase === 'idle') {
+      cd.textContent = '';
+      cd.className = 'lyric-countdown';
+    }
   }
 
   /* —— Freeze —— */
@@ -1829,7 +2071,11 @@ textarea {
     });
 
     /* Lyrics */
+    document.getElementById('lyric-auto').addEventListener('click', () => {
+      startAutoSing();
+    });
     document.getElementById('lyric-next').addEventListener('click', () => {
+      stopAutoSing();
       state.lyricIndex = (state.lyricIndex + 1) % PLAYLIST.length;
       saveState();
       renderLyrics();
@@ -1838,23 +2084,37 @@ textarea {
       musicPlay();
     });
     document.getElementById('lyric-prev').addEventListener('click', () => {
+      stopAutoSing();
       state.lyricIndex = (state.lyricIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
       saveState();
       renderLyrics();
       loadTrack(state.lyricIndex, false);
     });
     document.getElementById('lyric-play').addEventListener('click', () => {
+      stopAutoSing();
       loadTrack(state.lyricIndex, true);
       musicUnmute();
       musicPlay();
     });
     document.getElementById('lyric-mute').addEventListener('click', () => {
+      /* Manual override — keep auto runner if running so unmute can still fire */
       musicMute();
+      setCueHighlight('muted');
+      const cd = document.getElementById('lyric-countdown');
+      if (cd && autoSingPhase === 'playing') {
+        autoSingPhase = 'muted';
+      }
       toast('MUTED — kids finish the line!');
       tryVibrate(50);
     });
     document.getElementById('lyric-unmute').addEventListener('click', () => {
       musicUnmute();
+      setCueHighlight('done');
+      const cd = document.getElementById('lyric-countdown');
+      if (cd) {
+        cd.textContent = 'Unmuted';
+        cd.className = 'lyric-countdown unmuted';
+      }
     });
 
     /* Freeze */
@@ -1975,6 +2235,6 @@ textarea {
   registerSW();
 })();
 
-  </script>
+</script>
 </body>
 </html>
