@@ -54,7 +54,7 @@ html, body {
 }
 
 body {
-  padding: calc(12px + var(--safe-top)) 14px calc(110px + var(--safe-bot));
+  padding: calc(12px + var(--safe-top)) 14px calc(100px + var(--safe-bot));
 }
 
 #app {
@@ -449,26 +449,46 @@ body {
   gap: 10px;
   max-width: 480px;
   margin: 0 auto;
-  padding: 10px 12px calc(10px + var(--safe-bot));
+  padding: 12px 14px calc(12px + var(--safe-bot));
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 2px solid rgba(233, 30, 140, 0.25);
   box-shadow: 0 -8px 28px rgba(74, 20, 140, 0.12);
 }
-.yt-frame {
+.mini-player::before {
+  content: "♪";
   flex-shrink: 0;
-  width: 120px;
-  height: 68px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #111;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, var(--pink-hot), var(--lilac-deep));
+  box-shadow: var(--shadow);
+}
+.yt-frame {
+  /* Hidden video surface — YouTube kept for audio only */
+  position: absolute;
+  width: 1px;
+  height: 0;
+  opacity: 0;
   pointer-events: none;
+  overflow: hidden;
+  left: -9999px;
+  top: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
 }
 .yt-frame iframe {
-  width: 120px !important;
-  height: 68px !important;
+  width: 1px !important;
+  height: 1px !important;
   border: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 .mini-main {
   flex: 1;
@@ -627,7 +647,7 @@ textarea {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(118px + var(--safe-bot));
+  bottom: calc(100px + var(--safe-bot));
   transform: translateX(-50%);
   background: var(--ink);
   color: #fff;
@@ -671,6 +691,53 @@ textarea {
   transform: none;
 }
 
+/* Local audio + audio dock extras */
+.local-audio-card label.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0;
+}
+.local-audio-card input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+}
+#local-audio-status {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+#audio-source-badge {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lilac-deep);
+}
+#audio-source-badge.local { color: var(--success); }
+.local-tag {
+  font-style: normal;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--success);
+  background: #e8f5e9;
+  padding: 2px 6px;
+  border-radius: 999px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.playlist li.has-local .playlist-play {
+  box-shadow: 0 0 0 2px #81c784;
+}
+
   </style>
 </head>
 <body>
@@ -687,8 +754,16 @@ textarea {
 
       <div class="card playlist-card">
         <h2>Playlist</h2>
-        <p class="hint" style="margin:0 0 8px">Music plays inside this app (YouTube). Tap a song or use the bar below.</p>
+        <p class="hint" style="margin:0 0 8px">Audio-focused playback (YouTube audio hidden). Tap a song or use the dock below.</p>
         <ol id="playlist" class="playlist"></ol>
+      </div>
+
+      <div class="card local-audio-card">
+        <h2>My song files</h2>
+        <p class="hint" style="margin:0 0 10px">Optional: load purchased tracks. Prefer over YouTube. Name like <code>01-choosing-texas.mp3</code>.</p>
+        <label class="btn primary" for="local-audio-input">Load my song files</label>
+        <input type="file" id="local-audio-input" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg" multiple />
+        <p id="local-audio-status">Optional: load purchased MP3/M4A files (named like 01-choosing-texas.mp3)</p>
       </div>
 
       <nav class="game-grid" aria-label="Games">
@@ -872,11 +947,12 @@ textarea {
     </section>
   </div>
 
-  <!-- Persistent mini player (YouTube IFrame API) -->
-  <div id="mini-player" class="mini-player" aria-label="Music player">
-    <div id="yt-player" class="yt-frame"></div>
+  <!-- Audio dock: YouTube iframe kept but visually hidden -->
+  <div id="mini-player" class="mini-player" aria-label="Audio player">
+    <div id="yt-player" class="yt-frame" aria-hidden="true"></div>
     <div class="mini-main">
       <p id="mini-song-title" class="mini-song-title">1. Choosin' Texas — Ella Langley</p>
+      <span id="audio-source-badge">YouTube audio</span>
       <div class="mini-controls">
         <button type="button" id="mini-prev" class="mini-btn" aria-label="Previous">⏮</button>
         <button type="button" id="mini-play" class="mini-btn play" aria-label="Play or pause">▶</button>
@@ -894,17 +970,18 @@ textarea {
 
   const STORAGE_KEY = 'alison-party-v1';
 
-  /* youtubeId verified 2026-09-20 via oEmbed (replaced broken/wrong IDs) */
+  /* youtubeId: prefer Official Audio / Topic / lyric audio (verified oEmbed 2026-09-20) */
+  /* localKey: optional same-folder filename stem for purchased tracks */
   const PLAYLIST = [
-    { id: 1, title: "Choosin' Texas", artist: 'Ella Langley', youtubeId: 'nUsrYVxrDwI' },
-    { id: 2, title: 'You Belong With Me', artist: 'Taylor Swift', youtubeId: 'VuNIsY6JdUw' },
-    { id: 3, title: 'Sweet Caroline', artist: 'Neil Diamond', youtubeId: 'GmK5_lnQUbE' },
-    { id: 4, title: 'Eye of the Tiger', artist: 'Survivor', youtubeId: 'btPJPFnesV4' },
-    { id: 5, title: "Don't Stop Believin'", artist: 'Journey', youtubeId: '1k8craCGpgs' },
-    { id: 6, title: '22', artist: 'Taylor Swift', youtubeId: 'AgFeZr5ptV8' },
-    { id: 7, title: 'Roar', artist: 'Katy Perry', youtubeId: 'CevxZvSJLk8' },
-    { id: 8, title: 'Party in the USA', artist: 'Miley Cyrus', youtubeId: 'M11SvDtPBhA' },
-    { id: 9, title: 'Shake It Off', artist: 'Taylor Swift', youtubeId: 'nfWlot6h_JM' }
+    { id: 1, title: "Choosin' Texas", artist: 'Ella Langley', youtubeId: 'hLOheGDwD_0', localKey: '01-choosing-texas' },
+    { id: 2, title: 'You Belong With Me', artist: 'Taylor Swift', youtubeId: 'uD8d1KrDQcY', localKey: '02-you-belong-with-me' },
+    { id: 3, title: 'Sweet Caroline', artist: 'Neil Diamond', youtubeId: '4F_RCWVoL4s', localKey: '03-sweet-caroline' },
+    { id: 4, title: 'Eye of the Tiger', artist: 'Survivor', youtubeId: 'S-LO6dctBms', localKey: '04-eye-of-the-tiger' },
+    { id: 5, title: "Don't Stop Believin'", artist: 'Journey', youtubeId: '1k8craCGpgs', localKey: '05-dont-stop-believin' },
+    { id: 6, title: '22', artist: 'Taylor Swift', youtubeId: 'xGWTv4IQ7vQ', localKey: '06-22' },
+    { id: 7, title: 'Roar', artist: 'Katy Perry', youtubeId: '9VcDnWMOBtw', localKey: '07-roar' },
+    { id: 8, title: 'Party in the USA', artist: 'Miley Cyrus', youtubeId: 'R1kOdTm9FBk', localKey: '08-party-in-the-usa' },
+    { id: 9, title: 'Shake It Off', artist: 'Taylor Swift', youtubeId: 'H59xVMF4zxE', localKey: '09-shake-it-off' }
   ];
 
   /* Host timing cards only — NO full copyrighted lyrics */
@@ -978,12 +1055,17 @@ textarea {
   let timerId = null;
   let timerRunning = false;
 
-  /* —— YouTube mini player —— */
+  /* —— Audio dock (hidden YouTube + optional local HTML5) —— */
   let ytPlayer = null;
   let musicReady = false;
   let musicMuted = false;
   let musicPlaying = false;
   let pendingPlay = false;
+  /** @type {HTMLAudioElement|null} */
+  let htmlAudio = null;
+  /** song.id -> { url, name, source: 'file'|'folder' } */
+  const localTracks = {};
+  let usingLocal = false;
 
   function loadState() {
     try {
@@ -1035,7 +1117,10 @@ textarea {
   function updateMiniUI() {
     const song = currentSong();
     const titleEl = document.getElementById('mini-song-title');
-    if (titleEl) titleEl.textContent = songLabel(song, state.musicIndex);
+    if (titleEl) {
+      const src = hasLocal(song) ? ' · local' : '';
+      titleEl.textContent = songLabel(song, state.musicIndex) + src;
+    }
 
     const playBtn = document.getElementById('mini-play');
     if (playBtn) playBtn.textContent = musicPlaying ? '⏸' : '▶';
@@ -1046,15 +1131,142 @@ textarea {
       muteBtn.setAttribute('aria-label', musicMuted ? 'Unmute' : 'Mute');
     }
 
+    const badge = document.getElementById('audio-source-badge');
+    if (badge) {
+      badge.textContent = hasLocal(song) ? 'Local audio' : 'YouTube audio';
+      badge.classList.toggle('local', !!hasLocal(song));
+    }
+
     document.querySelectorAll('.playlist li').forEach((li) => {
-      li.classList.toggle('playing', Number(li.dataset.index) === state.musicIndex);
+      const idx = Number(li.dataset.index);
+      li.classList.toggle('playing', idx === state.musicIndex);
+      const s = PLAYLIST[idx];
+      li.classList.toggle('has-local', !!(s && hasLocal(s)));
+    });
+
+    const localStatus = document.getElementById('local-audio-status');
+    if (localStatus) {
+      const n = Object.keys(localTracks).length;
+      localStatus.textContent = n
+        ? n + ' local track' + (n === 1 ? '' : 's') + ' loaded — preferred over YouTube'
+        : 'Optional: load purchased MP3/M4A files (named like 01-choosing-texas.mp3)';
+    }
+  }
+
+  function hasLocal(song) {
+    return !!(song && localTracks[song.id] && localTracks[song.id].url);
+  }
+
+  function ensureHtmlAudio() {
+    if (htmlAudio) return htmlAudio;
+    htmlAudio = new Audio();
+    htmlAudio.preload = 'auto';
+    htmlAudio.addEventListener('play', () => { musicPlaying = true; updateMiniUI(); });
+    htmlAudio.addEventListener('pause', () => {
+      if (!htmlAudio || htmlAudio.ended) return;
+      musicPlaying = false;
+      updateMiniUI();
+    });
+    htmlAudio.addEventListener('ended', () => {
+      musicPlaying = false;
+      loadTrack(state.musicIndex + 1, true);
+      musicPlay();
+    });
+    htmlAudio.addEventListener('error', () => {
+      toast('Local file failed — trying YouTube');
+      const song = currentSong();
+      delete localTracks[song.id];
+      usingLocal = false;
+      updateMiniUI();
+      if (musicReady && ytPlayer) musicPlay();
+    });
+    return htmlAudio;
+  }
+
+  function pauseHtmlAudio() {
+    if (!htmlAudio) return;
+    try { htmlAudio.pause(); } catch (_) {}
+  }
+
+  function pauseYouTube() {
+    if (!ytPlayer || !musicReady) return;
+    try { ytPlayer.pauseVideo(); } catch (_) {}
+  }
+
+  function stopAllForSwitch() {
+    pauseHtmlAudio();
+    pauseYouTube();
+  }
+
+  function matchLocalFile(fileName) {
+    const base = String(fileName).replace(/\.[^.]+$/, '').toLowerCase();
+    const num = base.match(/^0?(\d{1,2})/);
+    if (num) {
+      const n = Number(num[1]);
+      if (n >= 1 && n <= PLAYLIST.length) return PLAYLIST[n - 1];
+    }
+    const slug = base.replace(/[^a-z0-9]+/g, '');
+    for (const s of PLAYLIST) {
+      const key = (s.localKey || '').replace(/[^a-z0-9]+/g, '');
+      const titleSlug = s.title.toLowerCase().replace(/[^a-z0-9]+/g, '');
+      if (slug.includes(key) || slug.includes(titleSlug) || key.includes(slug)) return s;
+    }
+    return null;
+  }
+
+  function setLocalTrack(song, url, name, source) {
+    const prev = localTracks[song.id];
+    if (prev && prev.url && prev.source === 'file' && prev.url.indexOf('blob:') === 0) {
+      try { URL.revokeObjectURL(prev.url); } catch (_) {}
+    }
+    localTracks[song.id] = { url: url, name: name, source: source };
+  }
+
+  function handleLocalFiles(fileList) {
+    const files = Array.from(fileList || []).filter((f) =>
+      /\.(mp3|m4a|aac|wav|ogg|flac)$/i.test(f.name) || (f.type && f.type.indexOf('audio/') === 0)
+    );
+    if (!files.length) {
+      toast('No audio files found');
+      return;
+    }
+    let matched = 0;
+    files.forEach((f) => {
+      const song = matchLocalFile(f.name);
+      if (!song) return;
+      setLocalTrack(song, URL.createObjectURL(f), f.name, 'file');
+      matched += 1;
+    });
+    updateMiniUI();
+    renderPlaylist();
+    toast(matched ? ('Loaded ' + matched + ' local track' + (matched === 1 ? '' : 's')) : 'Could not match filenames — use 01-choosing-texas.mp3 style');
+  }
+
+  function probeFolderLocals() {
+    if (location.protocol === 'file:') return;
+    PLAYLIST.forEach((song) => {
+      if (hasLocal(song) || !song.localKey) return;
+      const exts = ['.mp3', '.m4a', '.aac'];
+      (function tryNext(i) {
+        if (i >= exts.length || hasLocal(song)) return;
+        const path = './' + song.localKey + exts[i];
+        fetch(path, { method: 'HEAD' }).then((r) => {
+          if (r.ok) {
+            setLocalTrack(song, path, song.localKey + exts[i], 'folder');
+            updateMiniUI();
+            renderPlaylist();
+          } else tryNext(i + 1);
+        }).catch(() => tryNext(i + 1));
+      })(0);
     });
   }
 
   function ensurePlayer(thenPlay) {
+    const song = currentSong();
+    if (hasLocal(song)) return true;
     if (!musicReady || !ytPlayer) {
       if (thenPlay) pendingPlay = true;
-      toast('Loading YouTube… tap Play again in a sec');
+      toast('Loading audio… tap Play again in a sec');
       return false;
     }
     return true;
@@ -1065,6 +1277,29 @@ textarea {
     saveState();
     updateMiniUI();
     const song = currentSong();
+
+    if (hasLocal(song)) {
+      usingLocal = true;
+      pauseYouTube();
+      const a = ensureHtmlAudio();
+      a.src = localTracks[song.id].url;
+      a.muted = musicMuted;
+      a.currentTime = 0;
+      if (autoplay) {
+        pendingPlay = true;
+        a.play().then(() => {
+          musicPlaying = true;
+          pendingPlay = false;
+          updateMiniUI();
+        }).catch(() => toast('Tap ▶ to play local audio'));
+      } else {
+        musicPlaying = false;
+      }
+      return;
+    }
+
+    usingLocal = false;
+    pauseHtmlAudio();
     if (!musicReady || !ytPlayer) {
       if (autoplay) pendingPlay = true;
       return;
@@ -1082,11 +1317,27 @@ textarea {
   }
 
   function musicPlay() {
-    if (!ensurePlayer(true)) return;
     const song = currentSong();
+    if (hasLocal(song)) {
+      usingLocal = true;
+      pauseYouTube();
+      const a = ensureHtmlAudio();
+      if (!a.src || a.src.indexOf(localTracks[song.id].url) === -1) {
+        a.src = localTracks[song.id].url;
+      }
+      a.muted = musicMuted;
+      a.play().then(() => {
+        musicPlaying = true;
+        updateMiniUI();
+      }).catch(() => toast('Tap ▶ again to play'));
+      return;
+    }
+
+    if (!ensurePlayer(true)) return;
+    usingLocal = false;
+    pauseHtmlAudio();
     try {
       const st = ytPlayer.getPlayerState();
-      /* -1 unstarted, 5 cued, 2 paused, 0 ended */
       if (st === 0 || st === 5 || st === -1 || st === undefined) {
         ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: 0 });
       }
@@ -1099,8 +1350,10 @@ textarea {
   }
 
   function musicPause() {
-    if (!ytPlayer || !musicReady) return;
-    try { ytPlayer.pauseVideo(); } catch (_) {}
+    pauseHtmlAudio();
+    pauseYouTube();
+    musicPlaying = false;
+    updateMiniUI();
   }
 
   function musicTogglePlay() {
@@ -1110,6 +1363,7 @@ textarea {
 
   function musicMute() {
     musicMuted = true;
+    if (htmlAudio) htmlAudio.muted = true;
     if (ytPlayer && musicReady) {
       try { ytPlayer.mute(); } catch (_) {}
     }
@@ -1118,6 +1372,7 @@ textarea {
 
   function musicUnmute() {
     musicMuted = false;
+    if (htmlAudio) htmlAudio.muted = false;
     if (ytPlayer && musicReady) {
       try { ytPlayer.unMute(); } catch (_) {}
     }
@@ -1142,10 +1397,12 @@ textarea {
   function onPlayerReady() {
     musicReady = true;
     const song = currentSong();
-    try {
-      ytPlayer.cueVideoById({ videoId: song.youtubeId });
-      if (musicMuted) ytPlayer.mute();
-    } catch (_) {}
+    if (!hasLocal(song)) {
+      try {
+        ytPlayer.cueVideoById({ videoId: song.youtubeId });
+        if (musicMuted) ytPlayer.mute();
+      } catch (_) {}
+    }
     updateMiniUI();
     if (pendingPlay) {
       pendingPlay = false;
@@ -1156,19 +1413,18 @@ textarea {
   }
 
   function onPlayerStateChange(ev) {
-    /* YT.PlayerState: PLAYING=1 PAUSED=2 ENDED=0 BUFFERING=3 CUED=5 */
+    if (usingLocal || hasLocal(currentSong())) return;
     const s = ev.data;
     musicPlaying = s === 1 || s === 3;
     updateMiniUI();
     if (s === 0) {
-      /* auto-advance */
       loadTrack(state.musicIndex + 1, true);
       musicPlay();
     }
   }
 
   function onPlayerError() {
-    toast('This video blocked — skip to next');
+    toast('This track blocked — skip to next');
     setTimeout(() => {
       loadTrack(state.musicIndex + 1, true);
       musicPlay();
@@ -1180,14 +1436,14 @@ textarea {
       const note = document.getElementById('yt-note');
       if (note) {
         note.classList.remove('hidden');
-        note.textContent = '⚠️ YouTube needs HTTP — run a tiny local server (see README), then open that URL in Safari.';
+        note.textContent = '⚠️ YouTube audio needs HTTP — run a tiny local server (see README), or load your own song files below.';
       }
     }
 
     window.onYouTubeIframeAPIReady = function () {
       ytPlayer = new YT.Player('yt-player', {
-        width: '120',
-        height: '68',
+        width: '1',
+        height: '1',
         videoId: currentSong().youtubeId,
         playerVars: {
           playsinline: 1,
@@ -1237,7 +1493,7 @@ textarea {
       '<li data-index="' + i + '" class="' + (i === state.musicIndex ? 'playing' : '') + '">' +
       '<button type="button" class="playlist-play" data-index="' + i + '" aria-label="Play ' + escapeHtml(s.title) + '">▶</button>' +
       '<div class="playlist-text">' +
-      '<span class="playlist-title">' + escapeHtml(s.title) + '</span>' +
+      '<span class="playlist-title">' + escapeHtml(s.title) + (hasLocal(s) ? ' <em class="local-tag">local</em>' : '') + '</span>' +
       '<span class="artist">' + escapeHtml(s.artist) + '</span>' +
       '</div></li>'
     ).join('');
@@ -1496,6 +1752,14 @@ textarea {
       musicPlay();
     });
 
+    const localInput = document.getElementById('local-audio-input');
+    if (localInput) {
+      localInput.addEventListener('change', () => {
+        handleLocalFiles(localInput.files);
+        localInput.value = '';
+      });
+    }
+
     /* NTT */
     function setBuzz(t) {
       if (nttBuzzed) {
@@ -1707,6 +1971,7 @@ textarea {
   updateMiniUI();
   bind();
   initYouTube();
+  probeFolderLocals();
   registerSW();
 })();
 
