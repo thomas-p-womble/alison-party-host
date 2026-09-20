@@ -951,3 +951,58 @@ textarea {
   font-weight: 800;
   font-size: 0.95rem;
 }
+
+/* Cup Stacking */
+.countdown-display.cups {
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(3rem, 16vw, 4.5rem);
+  color: #6a1b9a;
+}
+.countdown-display.cups.running {
+  color: #2e7d32;
+}
+.countdown-display.cups.done {
+  color: var(--danger);
+  background: #ffebee;
+}
+.cups-status {
+  text-align: center;
+  font-weight: 900;
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+  margin: 0.25rem 0 0.75rem;
+}
+.cups-name-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid rgba(155, 126, 200, 0.45);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: #fff;
+}
+.cups-results {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.cups-results li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid rgba(155, 126, 200, 0.25);
+  font-weight: 800;
+  color: var(--ink);
+}
+.cups-results li:last-child { border-bottom: 0; }
+.cups-results .cups-time {
+  font-variant-numeric: tabular-nums;
+  color: var(--pink);
+}
+.mega.danger {
+  background: linear-gradient(135deg, #c62828, #e53935);
+  color: #fff;
+}

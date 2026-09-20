@@ -67,6 +67,7 @@
           <li><strong>Sing-Along</strong> — mute the hook so kids sing</li>
           <li><strong>Freeze Dance</strong> — dance / freeze when music stops</li>
           <li><strong>Hot Potato</strong> — pass a prize; music stops at random</li>
+          <li><strong>Cup Stacking</strong> — race the stopwatch; stack cups fast</li>
           <li><strong>Quizmaster</strong> — whose turn to ask</li>
           <li><strong>Alison Quiz</strong> — “How well do you know Alison?”</li>
         </ul>
@@ -78,6 +79,7 @@
         <button class="game-btn" data-view="lyrics">🎤 Sing-Along Cue</button>
         <button class="game-btn" data-view="freeze">❄️ Freeze Dance</button>
         <button class="game-btn" data-view="potato">🥔 Hot Potato</button>
+        <button class="game-btn" data-view="cups">🏆 Cup Stacking</button>
         <button class="game-btn" data-view="quizmaster">👑 Quizmaster</button>
         <button class="game-btn" data-view="trivia">❓ Alison Quiz</button>
         <button class="game-btn" data-view="timers">⏱️ Timers</button>
@@ -306,6 +308,48 @@
       </div>
       <div class="team-scores" id="trivia-teams"></div>
       <button type="button" id="trivia-reset" class="btn ghost">Reset quiz scores</button>
+    </section>
+
+
+    <!-- CUP STACKING -->
+    <section id="view-cups" class="view">
+      <header class="view-bar">
+        <button type="button" class="back" data-view="home" aria-label="Back">←</button>
+        <h1>Cup Stacking</h1>
+      </header>
+      <div class="card how-to">
+        <p class="how-title">How to run Cup Stacking</p>
+        <ol>
+          <li>Set up cups in a pyramid / stack challenge</li>
+          <li>Tap <strong>READY</strong> then <strong>GO</strong> — 3·2·1 countdown, then timer + music start together</li>
+          <li>When they finish stacking, tap <strong>STOP</strong> — time freezes</li>
+          <li>Record the name/time on the lap list; <strong>Next racer</strong> clears timer for the next kid</li>
+          <li>Music is a separate hype playlist (not Sing-Along / Potato / Freeze)</li>
+        </ol>
+      </div>
+      <div id="cups-display" class="countdown-display timer cups">0.00</div>
+      <p id="cups-status" class="cups-status">Ready</p>
+      <p id="cups-song" class="potato-song">—</p>
+      <div class="card">
+        <label class="field-label" for="cups-name">Racer name (optional)</label>
+        <input type="text" id="cups-name" class="cups-name-input" placeholder="Name" maxlength="40" autocomplete="off" />
+      </div>
+      <div class="row-btns">
+        <button type="button" id="cups-ready" class="btn secondary">READY</button>
+        <button type="button" id="cups-go" class="mega play">▶ GO</button>
+      </div>
+      <div class="row-btns">
+        <button type="button" id="cups-stop" class="mega danger">⏹ STOP</button>
+      </div>
+      <div class="row-btns">
+        <button type="button" id="cups-reset" class="btn ghost">Reset run</button>
+        <button type="button" id="cups-next" class="btn primary">Next racer</button>
+      </div>
+      <div class="card">
+        <p class="label">Recent times</p>
+        <ol id="cups-results" class="cups-results"></ol>
+      </div>
+      <div class="music-links playlist-mini" id="cups-links"></div>
     </section>
 
     <!-- TIMERS -->

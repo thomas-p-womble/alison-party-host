@@ -51,6 +51,21 @@
     { id: 'f12', title: 'Shut Up and Dance', artist: 'WALK THE MOON', youtubeId: 'nbcCG7PkI18', startBias: [15, 45] }
   ];
 
+  /* Cup Stacking — separate hype playlist (NOT Music Game / potato / freeze). Prefer Official / Topic. */
+  /* youtubeIds oEmbed-verified 2026-09-20 */
+  const CUP_PLAYLIST = [
+    { id: 'c1', title: 'Firework', artist: 'Katy Perry', youtubeId: 'QGJuMBdaqIw', startBias: [20, 55] },
+    { id: 'c2', title: 'Stronger (What Doesn\'t Kill You)', artist: 'Kelly Clarkson', youtubeId: 'Xn676-fLq7I', startBias: [20, 50] },
+    { id: 'c3', title: 'Believer', artist: 'Imagine Dragons', youtubeId: '7wtfhZwyrcc', startBias: [20, 55] },
+    { id: 'c4', title: 'Thunder', artist: 'Imagine Dragons', youtubeId: 'fKopy74weus', startBias: [15, 50] },
+    { id: 'c5', title: 'Call Me Maybe', artist: 'Carly Rae Jepsen', youtubeId: 'fWNaR-rxAic', startBias: [15, 45] },
+    { id: 'c6', title: 'Teenage Dream', artist: 'Katy Perry', youtubeId: '98WtmW-lfeE', startBias: [20, 50] },
+    { id: 'c7', title: "Can't Hold Us", artist: 'Macklemore & Ryan Lewis', youtubeId: '2zNSgSzhBfM', startBias: [20, 55] },
+    { id: 'c8', title: 'Break Free', artist: 'Ariana Grande', youtubeId: 'L8eRzOYhLuw', startBias: [15, 45] },
+    { id: 'c9', title: 'Calm Down', artist: 'Rema', youtubeId: 'CQLsdm1ZYAw', startBias: [20, 55] },
+    { id: 'c10', title: 'TiK ToK', artist: 'Kesha', youtubeId: 'iP6XpLQM2Cs', startBias: [15, 45] }
+  ];
+
   /* Host timing cards only — NO full copyrighted lyrics */
   /* startAt/muteAt/unmuteAt = seconds; startAt 0 = from beginning; catchiest shout/title hook only (~3–8s) */
   const LYRIC_CUES = {
@@ -189,6 +204,18 @@
   let freezeOrderIdx = 0;
   let freezeSavedMusicIndex = null;
   let freezeIndex = 0;
+  let cupMode = false;
+  let cupSong = null;
+  let cupOrder = [];
+  let cupOrderIdx = 0;
+  let cupSavedMusicIndex = null;
+  let cupIndex = 0;
+  let cupPhase = 'ready'; /* ready | countdown | running | done */
+  let cupElapsedMs = 0;
+  let cupStartWall = 0;
+  let cupRaf = null;
+  let cupCountdownTimer = null;
+  let cupResults = [];
   let timerSec = 60;
   let timerLeft = 60;
   let timerId = null;
@@ -260,6 +287,7 @@
   function activePlaybackSong() {
     if (potatoMode && potatoSong) return potatoSong;
     if (freezeMode && freezeSong) return freezeSong;
+    if (cupMode && cupSong) return cupSong;
     return currentSong();
   }
 
@@ -329,6 +357,8 @@
         titleEl.textContent = '🥔 ' + potatoSong.title + (potatoSong.artist ? ' — ' + potatoSong.artist : '');
       } else if (freezeMode && freezeSong) {
         titleEl.textContent = '❄️ ' + freezeSong.title + (freezeSong.artist ? ' — ' + freezeSong.artist : '');
+      } else if (cupMode && cupSong) {
+        titleEl.textContent = '🏆 ' + cupSong.title + (cupSong.artist ? ' — ' + cupSong.artist : '');
       } else {
         const src = hasLocal(song) ? ' · local' : '';
         titleEl.textContent = songLabel(song, state.musicIndex) + src;
@@ -532,7 +562,7 @@
 
   function musicPlay() {
     const song = activePlaybackSong();
-    if (!potatoMode && !freezeMode && hasLocal(song)) {
+    if (!potatoMode && !freezeMode && !cupMode && hasLocal(song)) {
       usingLocal = true;
       pauseYouTube();
       const a = ensureHtmlAudio();
@@ -558,7 +588,7 @@
       const st = ytPlayer.getPlayerState();
       if (st === 0 || st === 5 || st === -1 || st === undefined) {
         let startAt = 0;
-        if (freezeMode || potatoMode) {
+        if (freezeMode || potatoMode || cupMode) {
           startAt = lastYtStartSeconds > 0 ? lastYtStartSeconds : energeticStartSeconds(song);
         }
         lastYtStartSeconds = startAt;
@@ -744,8 +774,8 @@
   }
 
   function onPlayerStateChange(ev) {
-    if (usingLocal && !freezeMode && !potatoMode) return;
-    if (!freezeMode && !potatoMode && hasLocal(currentSong())) return;
+    if (usingLocal && !freezeMode && !potatoMode && !cupMode) return;
+    if (!freezeMode && !potatoMode && !cupMode && hasLocal(currentSong())) return;
     const s = ev.data;
     musicPlaying = s === 1 || s === 3;
     if (pendingPlay && (s === 5 || s === 3 || s === 1)) {
@@ -757,12 +787,12 @@
       musicPlaying = true;
     }
     /* iOS often auto-pauses "barely visible" players — re-play once during guard window */
-    if (s === 2 && (freezeMode || potatoMode) && Date.now() < freezePlayGuardUntil) {
+    if (s === 2 && (freezeMode || potatoMode || cupMode) && Date.now() < freezePlayGuardUntil) {
       try { ytPlayer.playVideo(); musicPlaying = true; } catch (_) {}
     }
     updateMiniUI();
     if (s === 0) {
-      if (freezeMode || potatoMode) {
+      if (freezeMode || potatoMode || cupMode) {
         musicPlaying = false;
         updateMiniUI();
         return;
@@ -774,7 +804,7 @@
 
   function onPlayerError() {
     toast('This track blocked — try next');
-    if (freezeMode || potatoMode) {
+    if (freezeMode || potatoMode || cupMode) {
       musicPlaying = false;
       updateMiniUI();
       return;
@@ -878,6 +908,8 @@
     if (leavingPotato) leavePotatoView();
     const leavingFreeze = id !== 'freeze' && freezeMode;
     if (leavingFreeze) leaveFreezeView();
+    const leavingCups = id !== 'cups' && cupMode;
+    if (leavingCups) leaveCupsView();
     document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
     const view = document.getElementById('view-' + id);
     if (view) view.classList.add('active');
@@ -895,6 +927,10 @@
     if (id === 'potato') {
       updatePotatoSongLabel();
       updatePotatoStartLabel();
+    }
+    if (id === 'cups') {
+      enterCupMode();
+      renderCups();
     }
   }
 
@@ -1401,6 +1437,313 @@
     updateMiniUI();
   }
 
+
+  /* —— Cup Stacking race timer + hype playlist —— */
+  function formatStopwatch(ms) {
+    const total = Math.max(0, Math.floor(ms));
+    const tenthsTotal = Math.floor(total / 100); /* hundredths */
+    const mins = Math.floor(tenthsTotal / 6000);
+    const secs = Math.floor((tenthsTotal % 6000) / 100);
+    const hundredths = tenthsTotal % 100;
+    if (mins > 0) {
+      return mins + ':' + String(secs).padStart(2, '0') + '.' + String(hundredths).padStart(2, '0');
+    }
+    return secs + '.' + String(hundredths).padStart(2, '0');
+  }
+
+  function shuffleCupOrder() {
+    cupOrder = CUP_PLAYLIST.map((_, i) => i);
+    for (let i = cupOrder.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = cupOrder[i];
+      cupOrder[i] = cupOrder[j];
+      cupOrder[j] = tmp;
+    }
+    cupOrderIdx = 0;
+  }
+
+  function nextCupSong() {
+    if (!cupOrder.length || cupOrderIdx >= cupOrder.length) {
+      shuffleCupOrder();
+    }
+    const song = CUP_PLAYLIST[cupOrder[cupOrderIdx]];
+    cupOrderIdx += 1;
+    cupIndex = cupOrder[cupOrderIdx - 1];
+    return song;
+  }
+
+  function enterCupMode() {
+    if (!cupMode) {
+      cupSavedMusicIndex = state.musicIndex;
+      cupMode = true;
+      if (!cupOrder.length) shuffleCupOrder();
+    }
+  }
+
+  function loadCupVideo(song, autoplay, startSeconds) {
+    cupSong = song;
+    usingLocal = false;
+    pauseHtmlAudio();
+    updateMiniUI();
+    updateCupSongLabel();
+    const startAt = typeof startSeconds === 'number' ? startSeconds : energeticStartSeconds(song);
+    if (!autoplay) {
+      if (!musicReady || !ytPlayer) return false;
+      try {
+        ytPlayer.cueVideoById({ videoId: song.youtubeId, startSeconds: startAt });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+    return loadAndPlayYt(song.youtubeId, startAt);
+  }
+
+  function updateCupSongLabel() {
+    const el = document.getElementById('cups-song');
+    if (!el) return;
+    if (cupSong) {
+      el.textContent = cupSong.title + (cupSong.artist ? ' — ' + cupSong.artist : '');
+    } else {
+      el.textContent = '—';
+    }
+  }
+
+  function setCupsStatus(text) {
+    const el = document.getElementById('cups-status');
+    if (el) el.textContent = text;
+  }
+
+  function setCupsDisplay(ms, phase) {
+    const el = document.getElementById('cups-display');
+    if (!el) return;
+    el.textContent = formatStopwatch(ms);
+    el.classList.remove('running', 'done', 'pulse');
+    if (phase === 'running') el.classList.add('running');
+    if (phase === 'done') el.classList.add('done');
+  }
+
+  function stopCupRaf() {
+    if (cupRaf) {
+      cancelAnimationFrame(cupRaf);
+      cupRaf = null;
+    }
+  }
+
+  function clearCupCountdown() {
+    if (cupCountdownTimer) {
+      clearTimeout(cupCountdownTimer);
+      cupCountdownTimer = null;
+    }
+  }
+
+  function tickCupStopwatch() {
+    if (cupPhase !== 'running') return;
+    cupElapsedMs = Date.now() - cupStartWall;
+    setCupsDisplay(cupElapsedMs, 'running');
+    cupRaf = requestAnimationFrame(tickCupStopwatch);
+  }
+
+  function loadCupResultsFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY + '-cups');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) cupResults = parsed.slice(0, 12);
+    } catch (_) {}
+  }
+
+  function saveCupResults() {
+    try {
+      localStorage.setItem(STORAGE_KEY + '-cups', JSON.stringify(cupResults.slice(0, 12)));
+    } catch (_) {}
+  }
+
+  function renderCupResults() {
+    const ol = document.getElementById('cups-results');
+    if (!ol) return;
+    if (!cupResults.length) {
+      ol.innerHTML = '<li class="cups-empty">No times yet — race!</li>';
+      return;
+    }
+    ol.innerHTML = cupResults.map((r) =>
+      '<li><span>' + escapeHtml(r.name || 'Racer') + '</span>' +
+      '<span class="cups-time">' + escapeHtml(r.label) + '</span></li>'
+    ).join('');
+  }
+
+  function renderCups() {
+    loadCupResultsFromStorage();
+    setCupsDisplay(cupElapsedMs, cupPhase === 'done' ? 'done' : (cupPhase === 'running' ? 'running' : 'ready'));
+    if (cupPhase === 'ready') setCupsStatus('Ready');
+    else if (cupPhase === 'countdown') setCupsStatus('Countdown…');
+    else if (cupPhase === 'running') setCupsStatus('Running');
+    else if (cupPhase === 'done') setCupsStatus('Done');
+    updateCupSongLabel();
+    renderCupResults();
+    const links = document.getElementById('cups-links');
+    if (links) {
+      links.innerHTML = CUP_PLAYLIST.map((s, i) =>
+        '<button type="button" class="music-link" data-cup-index="' + i + '">' + escapeHtml(s.title) + '</button>'
+      ).join('');
+      links.querySelectorAll('[data-cup-index]').forEach((btn) => {
+        btn.onclick = () => {
+          enterCupMode();
+          const idx = Number(btn.dataset.cupIndex);
+          const song = CUP_PLAYLIST[idx];
+          if (!song) return;
+          cupIndex = idx;
+          cupSong = song;
+          updateCupSongLabel();
+          updateMiniUI();
+          /* Preview only cues — race music starts on GO */
+          if (cupPhase === 'ready' || cupPhase === 'done') {
+            const startAt = energeticStartSeconds(song);
+            if (musicReady && ytPlayer) {
+              try { ytPlayer.cueVideoById({ videoId: song.youtubeId, startSeconds: startAt }); } catch (_) {}
+            }
+          }
+        };
+      });
+    }
+  }
+
+  function cupsReady() {
+    clearCupCountdown();
+    stopCupRaf();
+    musicPause();
+    cupPhase = 'ready';
+    cupElapsedMs = 0;
+    setCupsDisplay(0, 'ready');
+    setCupsStatus('Ready');
+    tryVibrate(30);
+  }
+
+  function startCupRaceMusicAndTimer() {
+    enterCupMode();
+    musicUnmute();
+    const song = cupSong || nextCupSong();
+    cupSong = song;
+    const startAt = energeticStartSeconds(song);
+    loadCupVideo(song, true, startAt);
+    cupPhase = 'running';
+    cupStartWall = Date.now();
+    cupElapsedMs = 0;
+    setCupsDisplay(0, 'running');
+    setCupsStatus('GO!');
+    setTimeout(() => { if (cupPhase === 'running') setCupsStatus('Running'); }, 600);
+    stopCupRaf();
+    cupRaf = requestAnimationFrame(tickCupStopwatch);
+    tryVibrate([40, 40, 80]);
+  }
+
+  function cupsGo() {
+    if (cupPhase === 'countdown' || cupPhase === 'running') return;
+    enterCupMode();
+    clearCupCountdown();
+    stopCupRaf();
+    musicPause(); /* no music during countdown */
+    cupPhase = 'countdown';
+    cupElapsedMs = 0;
+    setCupsDisplay(0, 'ready');
+    const steps = ['3', '2', '1', 'GO!'];
+    let i = 0;
+    function tick() {
+      if (cupPhase !== 'countdown') return;
+      const step = steps[i];
+      setCupsStatus(step);
+      const disp = document.getElementById('cups-display');
+      if (disp) {
+        disp.textContent = step === 'GO!' ? '0.00' : step;
+        disp.classList.remove('running', 'done', 'pulse');
+        void disp.offsetWidth;
+        disp.classList.add('pulse');
+      }
+      tryVibrate(step === 'GO!' ? [40, 40, 80] : 40);
+      i += 1;
+      if (i < steps.length) {
+        cupCountdownTimer = setTimeout(tick, 900);
+      } else {
+        cupCountdownTimer = setTimeout(() => {
+          if (cupPhase === 'countdown') startCupRaceMusicAndTimer();
+        }, 200);
+      }
+    }
+    tick();
+  }
+
+  function cupsStop() {
+    if (cupPhase !== 'running' && cupPhase !== 'countdown') return;
+    clearCupCountdown();
+    if (cupPhase === 'countdown') {
+      cupPhase = 'ready';
+      setCupsDisplay(0, 'ready');
+      setCupsStatus('Ready');
+      musicPause();
+      return;
+    }
+    stopCupRaf();
+    cupElapsedMs = Date.now() - cupStartWall;
+    cupPhase = 'done';
+    setCupsDisplay(cupElapsedMs, 'done');
+    setCupsStatus('Done — ' + formatStopwatch(cupElapsedMs));
+    musicPause();
+    tryVibrate([80, 40, 120]);
+  }
+
+  function cupsReset() {
+    clearCupCountdown();
+    stopCupRaf();
+    musicPause();
+    cupPhase = 'ready';
+    cupElapsedMs = 0;
+    setCupsDisplay(0, 'ready');
+    setCupsStatus('Ready');
+  }
+
+  function cupsNextRacer() {
+    if (cupElapsedMs > 0 && (cupPhase === 'done' || cupPhase === 'running')) {
+      if (cupPhase === 'running') {
+        stopCupRaf();
+        cupElapsedMs = Date.now() - cupStartWall;
+        musicPause();
+      }
+      const nameEl = document.getElementById('cups-name');
+      const name = (nameEl && nameEl.value.trim()) || 'Racer';
+      const label = formatStopwatch(cupElapsedMs);
+      cupResults.unshift({ name: name, timeMs: cupElapsedMs, label: label });
+      if (cupResults.length > 12) cupResults = cupResults.slice(0, 12);
+      saveCupResults();
+      renderCupResults();
+      if (nameEl) nameEl.value = '';
+      toast('Saved ' + name + ' — ' + label);
+    }
+    clearCupCountdown();
+    stopCupRaf();
+    musicPause();
+    cupPhase = 'ready';
+    cupElapsedMs = 0;
+    setCupsDisplay(0, 'ready');
+    setCupsStatus('Ready');
+    /* advance to next song for next racer */
+    cupSong = null;
+    updateCupSongLabel();
+  }
+
+  function leaveCupsView() {
+    clearCupCountdown();
+    stopCupRaf();
+    const wasMode = cupMode;
+    cupMode = false;
+    cupSong = null;
+    musicPause();
+    if (wasMode && cupSavedMusicIndex != null) {
+      loadTrack(cupSavedMusicIndex, false);
+    }
+    cupSavedMusicIndex = null;
+    updateMiniUI();
+  }
+
   /* —— Wire events —— */
   function safeOn(id, event, handler) {
     const el = document.getElementById(id);
@@ -1607,6 +1950,12 @@
     safeOn('potato-start', 'click', startPotato);
     safeOn('potato-stop', 'click', stopPotato);
     safeOn('potato-reset', 'click', resetPotato);
+
+    safeOn('cups-ready', 'click', cupsReady);
+    safeOn('cups-go', 'click', cupsGo);
+    safeOn('cups-stop', 'click', cupsStop);
+    safeOn('cups-reset', 'click', cupsReset);
+    safeOn('cups-next', 'click', cupsNextRacer);
 
     /* Quizmaster */
     safeOn('qm-next', 'click', () => {
