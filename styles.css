@@ -878,10 +878,12 @@ textarea {
 }
 
 
-/* Dock mute — large hit target (host uses this for sing-along timing) */
-#mini-mute.mini-mute-loud,
-#mini-mute {
-  min-width: 56px;
-  min-height: 56px;
-  font-size: 1.6rem;
+
+
+#view-lyrics {
+  padding-bottom: 24px;
+}
+#view-lyrics .mega.mute-toggle {
+  position: relative;
+  z-index: 5;
 }

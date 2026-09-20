@@ -512,30 +512,22 @@
 
   function musicMute() {
     musicMuted = true;
-    if (htmlAudio) {
-      htmlAudio.muted = true;
-      htmlAudio.volume = 0;
-    }
+    if (htmlAudio) htmlAudio.muted = true;
     if (ytPlayer && musicReady) {
       try { ytPlayer.mute(); } catch (_) {}
-      try {
-        if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(0);
-      } catch (_) {}
+      /* Keep playback going — mute must not pause */
+      try { ytPlayer.playVideo(); } catch (_) {}
     }
+    musicPlaying = true;
     updateMiniUI();
   }
 
   function musicUnmute() {
     musicMuted = false;
-    if (htmlAudio) {
-      htmlAudio.muted = false;
-      htmlAudio.volume = 1;
-    }
+    if (htmlAudio) htmlAudio.muted = false;
     if (ytPlayer && musicReady) {
       try { ytPlayer.unMute(); } catch (_) {}
-      try {
-        if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(100);
-      } catch (_) {}
+      try { ytPlayer.playVideo(); } catch (_) {}
     }
     updateMiniUI();
   }
@@ -554,6 +546,7 @@
   function musicToggleMute() {
     if (musicMuted) musicUnmute();
     else musicMute();
+    updateLyricMuteUI();
   }
 
   function updateLyricMuteUI() {
@@ -1293,7 +1286,9 @@
 
     /* Mini player */
     document.getElementById('mini-play').addEventListener('click', musicTogglePlay);
-    bindInstantPress(document.getElementById('mini-mute'), () => {
+    document.getElementById('mini-mute').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       musicToggleMute();
     });
     document.getElementById('mini-prev').addEventListener('click', () => {
@@ -1382,7 +1377,9 @@
     });
 
     /* Lyrics — instant mute on pointerdown (not click/release) */
-    bindInstantPress(document.getElementById('lyric-mute-toggle'), () => {
+    document.getElementById('lyric-mute-toggle').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       lyricToggleMute();
     });
     document.getElementById('lyric-next').addEventListener('click', () => {
@@ -1404,10 +1401,15 @@
       setCueHighlight('playing');
     });
     document.getElementById('lyric-play').addEventListener('click', () => {
-      loadTrack(state.lyricIndex, true);
       musicUnmute();
+      loadTrack(state.lyricIndex, true);
+      /* Force start at 0 even if same track already loaded */
+      try {
+        if (ytPlayer && musicReady) ytPlayer.seekTo(0, true);
+      } catch (_) {}
       musicPlay();
       setCueHighlight('playing');
+      toast('Playing from start');
     });
 
     /* Freeze */
