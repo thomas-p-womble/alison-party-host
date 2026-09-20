@@ -658,6 +658,58 @@ body {
   margin-bottom: 12px;
 }
 
+
+/* Alison Quiz */
+.quiz-title {
+  text-align: center;
+  font-weight: 800;
+  font-size: clamp(1.15rem, 4.5vw, 1.45rem);
+  color: var(--pink);
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+.quiz-progress {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+.quiz-card {
+  margin-bottom: 12px;
+}
+.quiz-question {
+  font-size: clamp(1.25rem, 5.5vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--ink);
+  margin: 0;
+  text-align: center;
+}
+.quiz-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+}
+.quiz-chip {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fce4ec, #f3e5f5);
+  border: 2px solid var(--lilac);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+#trivia-prev:disabled,
+#trivia-next:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
 /* Quizmaster */
 .field-label {
   display: block;

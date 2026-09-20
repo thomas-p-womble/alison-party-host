@@ -48,7 +48,7 @@
         <button class="game-btn" data-view="freeze">❄️ Freeze Dance</button>
         <button class="game-btn" data-view="potato">🥔 Hot Potato</button>
         <button class="game-btn" data-view="quizmaster">👑 Quizmaster</button>
-        <button class="game-btn" data-view="trivia">❓ Trivia Scores</button>
+        <button class="game-btn" data-view="trivia">❓ Alison Quiz</button>
         <button class="game-btn" data-view="timers">⏱️ Timers</button>
       </nav>
 
@@ -191,16 +191,25 @@
       </div>
     </section>
 
-    <!-- TRIVIA SCORES -->
+    <!-- ALISON QUIZ / TRIVIA -->
     <section id="view-trivia" class="view">
       <header class="view-bar">
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
-        <h1>Trivia Scores</h1>
+        <h1>Alison Quiz</h1>
       </header>
-      <p class="coach">Use your paper questions. Tap +1 when a team is right.</p>
+      <p class="quiz-title">How Well Do You Know Alison?</p>
+      <p id="trivia-progress" class="quiz-progress">Question 1 of 10</p>
+      <div class="card quiz-card">
+        <p id="trivia-question" class="quiz-question">—</p>
+        <div id="trivia-choices" class="quiz-choices hidden" aria-label="Guest choice prompts"></div>
+      </div>
+      <p class="coach">Open-ended — Alison/host judges live. Tap +1 when you accept a team’s answer.</p>
+      <div class="row-btns">
+        <button type="button" id="trivia-prev" class="btn secondary">← Prev</button>
+        <button type="button" id="trivia-next" class="btn primary">Next →</button>
+      </div>
       <div class="team-scores" id="trivia-teams"></div>
-      <div class="card tip">Keep the question cards in hand — this screen is the scoreboard only.</div>
-      <button type="button" id="trivia-reset" class="btn ghost">Reset trivia scores</button>
+      <button type="button" id="trivia-reset" class="btn ghost">Reset quiz scores</button>
     </section>
 
     <!-- TIMERS -->

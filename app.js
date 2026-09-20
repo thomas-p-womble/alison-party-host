@@ -77,10 +77,32 @@
     }
   };
 
+
+  /* How Well Do You Know Alison? — open-ended; host/Alison judges live (no answer key) */
+  const QUIZ_QUESTIONS = [
+    { q: "What is Alison’s absolute favorite food?" },
+    { q: "If Alison could only listen to one song or artist on repeat for the rest of her life, who or what would it be?" },
+    { q: "What is her favorite color?" },
+    { q: "What does Alison want to be when she grows up?" },
+    {
+      q: "What is the name of her favorite movie or TV show right now?",
+      choices: ["Super Girl", "Yes Day", "27 Dresses"]
+    },
+    { q: "If she had a completely free afternoon, what is her favorite hobby or thing to do for fun?" },
+    {
+      q: "What is her go-to flavor when she gets ice cream?",
+      choices: ["Sea Salt Caramel", "Strawberry", "Chocolate"]
+    },
+    { q: "Which subject is her favorite in school?" },
+    { q: "What is her favorite holiday or time of the year?" },
+    { q: "If Alison could magically have any pet in the world (real or imaginary), what would she choose?" }
+  ];
+
   const DEFAULT_STATE = {
     nttScores: { A: 0, B: 0, C: 0 },
     nttIndex: 0,
     triviaScores: { A: 0, B: 0, C: 0 },
+    triviaIndex: 0,
     freezeCount: 12,
     lyricIndex: 0,
     qmRoster: ['Alison 👑', 'Guest 1', 'Guest 2', 'Guest 3', 'Guest 4'],
@@ -130,6 +152,7 @@
         nttScores: state.nttScores,
         nttIndex: state.nttIndex,
         triviaScores: state.triviaScores,
+        triviaIndex: state.triviaIndex,
         freezeCount: state.freezeCount,
         lyricIndex: state.lyricIndex,
         qmRoster: state.qmRoster,
@@ -897,8 +920,35 @@
     document.getElementById('qm-roster').value = roster.join('\n');
   }
 
-  /* —— Trivia —— */
+  /* —— Alison Quiz (open-ended trivia) —— */
   function renderTrivia() {
+    if (typeof state.triviaIndex !== 'number' || state.triviaIndex < 0) state.triviaIndex = 0;
+    if (state.triviaIndex >= QUIZ_QUESTIONS.length) state.triviaIndex = QUIZ_QUESTIONS.length - 1;
+
+    const idx = state.triviaIndex;
+    const item = QUIZ_QUESTIONS[idx];
+    const total = QUIZ_QUESTIONS.length;
+
+    document.getElementById('trivia-progress').textContent =
+      'Question ' + (idx + 1) + ' of ' + total;
+    document.getElementById('trivia-question').textContent = item.q;
+
+    const choicesEl = document.getElementById('trivia-choices');
+    if (item.choices && item.choices.length) {
+      choicesEl.classList.remove('hidden');
+      choicesEl.innerHTML = item.choices.map((c) =>
+        '<span class="quiz-chip">' + escapeHtml(c) + '</span>'
+      ).join('');
+    } else {
+      choicesEl.classList.add('hidden');
+      choicesEl.innerHTML = '';
+    }
+
+    const prevBtn = document.getElementById('trivia-prev');
+    const nextBtn = document.getElementById('trivia-next');
+    if (prevBtn) prevBtn.disabled = idx <= 0;
+    if (nextBtn) nextBtn.disabled = idx >= total - 1;
+
     const teams = document.getElementById('trivia-teams');
     teams.innerHTML = ['A', 'B', 'C'].map((t) => teamRowHTML('trivia', t, state.triviaScores[t])).join('');
     bindTeamButtons('trivia', state.triviaScores, () => {
@@ -1209,12 +1259,29 @@
       toast('Roster saved');
     });
 
-    /* Trivia reset */
+    /* Alison Quiz */
+    document.getElementById('trivia-prev').addEventListener('click', () => {
+      if (state.triviaIndex > 0) {
+        state.triviaIndex -= 1;
+        saveState();
+        renderTrivia();
+        tryVibrate(20);
+      }
+    });
+    document.getElementById('trivia-next').addEventListener('click', () => {
+      if (state.triviaIndex < QUIZ_QUESTIONS.length - 1) {
+        state.triviaIndex += 1;
+        saveState();
+        renderTrivia();
+        tryVibrate(20);
+      }
+    });
     document.getElementById('trivia-reset').addEventListener('click', () => {
       state.triviaScores = { A: 0, B: 0, C: 0 };
+      state.triviaIndex = 0;
       saveState();
       renderTrivia();
-      toast('Trivia scores cleared');
+      toast('Quiz scores cleared');
     });
 
     /* Timers */

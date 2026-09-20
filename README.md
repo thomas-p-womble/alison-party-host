@@ -68,7 +68,7 @@ Audio dock: **Play/Pause · Mute/Unmute · Prev/Next · title**. Games use the s
 | **Freeze Dance** | PLAY / FREEZE controls in-app music + eliminate counter |
 | **Hot Potato / Prize Pass** | Random 8–25s stop (plays/pauses music) |
 | **Alison Quizmaster** | Rotates who asks next; editable roster |
-| **Trivia Scores** | Score shell for paper questions |
+| **Alison Quiz** | How Well Do You Know Alison? — 10 open-ended Qs + team A/B/C scores |
 | **Timers** | 1 / 3 / 5 / 10 minute presets |
 
 ## Files
