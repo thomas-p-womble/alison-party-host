@@ -247,6 +247,35 @@
     return Math.round(20 + Math.random() * 40);
   }
 
+  function playYtNudge() {
+    if (!ytPlayer || !musicReady) return;
+    try { ytPlayer.playVideo(); } catch (_) {}
+    try { if (!musicMuted) ytPlayer.unMute(); } catch (_) {}
+    musicPlaying = true;
+    updateMiniUI();
+  }
+
+  function loadAndPlayYt(videoId, startSeconds) {
+    const startAt = Math.max(0, Number(startSeconds) || 0);
+    if (!musicReady || !ytPlayer) {
+      pendingPlay = true;
+      toast('Loading audio… tap again in a sec');
+      return false;
+    }
+    try {
+      pendingPlay = true;
+      ytPlayer.loadVideoById({ videoId: videoId, startSeconds: startAt });
+      /* User-gesture play + delayed nudges for iOS race after loadVideoById */
+      playYtNudge();
+      setTimeout(playYtNudge, 150);
+      setTimeout(playYtNudge, 450);
+      return true;
+    } catch (e) {
+      toast('Could not load track');
+      return false;
+    }
+  }
+
   function songLabel(song, index) {
     return (index + 1) + '. ' + song.title + (song.artist ? ' — ' + song.artist : '');
   }
@@ -487,7 +516,8 @@
     try {
       const st = ytPlayer.getPlayerState();
       if (st === 0 || st === 5 || st === -1 || st === undefined) {
-        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: 0 });
+        const startAt = (freezeMode || potatoMode) ? energeticStartSeconds(song) : 0;
+        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: startAt });
       }
       ytPlayer.playVideo();
       if (musicMuted) ytPlayer.mute();
@@ -662,18 +692,39 @@
   }
 
   function onPlayerStateChange(ev) {
-    if (usingLocal || hasLocal(currentSong())) return;
+    /* During freeze/potato, don't treat Music Game local files as blocking YT events */
+    if (usingLocal && !freezeMode && !potatoMode) return;
+    if (!freezeMode && !potatoMode && hasLocal(currentSong())) return;
     const s = ev.data;
     musicPlaying = s === 1 || s === 3;
+    /* iOS: loadVideoById sometimes needs an explicit play once CUED/BUFFERING */
+    if (pendingPlay && (s === 5 || s === 3 || s === 1)) {
+      pendingPlay = false;
+      try {
+        ytPlayer.playVideo();
+        if (!musicMuted) ytPlayer.unMute();
+      } catch (_) {}
+      musicPlaying = true;
+    }
     updateMiniUI();
     if (s === 0) {
+      if (freezeMode || potatoMode) {
+        musicPlaying = false;
+        updateMiniUI();
+        return;
+      }
       loadTrack(state.musicIndex + 1, true);
       musicPlay();
     }
   }
 
   function onPlayerError() {
-    toast('This track blocked — skip to next');
+    toast('This track blocked — try next');
+    if (freezeMode || potatoMode) {
+      musicPlaying = false;
+      updateMiniUI();
+      return;
+    }
     setTimeout(() => {
       loadTrack(state.musicIndex + 1, true);
       musicPlay();
@@ -873,23 +924,16 @@
     pauseHtmlAudio();
     updateMiniUI();
     const startAt = typeof startSeconds === 'number' ? startSeconds : energeticStartSeconds(song);
-    if (!musicReady || !ytPlayer) {
-      if (autoplay) pendingPlay = true;
-      toast('Loading audio… tap PLAY again in a sec');
-      return false;
-    }
-    try {
-      if (autoplay) {
-        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: startAt });
-        pendingPlay = true;
-      } else {
+    if (!autoplay) {
+      if (!musicReady || !ytPlayer) return false;
+      try {
         ytPlayer.cueVideoById({ videoId: song.youtubeId, startSeconds: startAt });
+        return true;
+      } catch (e) {
+        return false;
       }
-      return true;
-    } catch (e) {
-      toast('Could not load freeze track');
-      return false;
     }
+    return loadAndPlayYt(song.youtubeId, startAt);
   }
 
   function leaveFreezeView() {
@@ -919,20 +963,8 @@
           if (!song) return;
           freezeIndex = idx;
           const startAt = energeticStartSeconds(song);
-          loadFreezeVideo(song, true, startAt);
           musicUnmute();
-          try {
-            if (ytPlayer && musicReady) {
-              ytPlayer.playVideo();
-              ytPlayer.unMute();
-              musicPlaying = true;
-              updateMiniUI();
-            } else {
-              musicPlay();
-            }
-          } catch (_) {
-            musicPlay();
-          }
+          loadFreezeVideo(song, true, startAt);
           const el = document.getElementById('freeze-status');
           if (el) {
             el.textContent = '💃 DANCE!';
@@ -945,6 +977,7 @@
 
   function setFreezeMode(mode) {
     const el = document.getElementById('freeze-status');
+    if (!el) return;
     el.classList.remove('frozen', 'pulse');
     void el.offsetWidth;
     el.classList.add('pulse');
@@ -952,22 +985,10 @@
       el.textContent = '💃 DANCE!';
       el.classList.remove('frozen');
       enterFreezeMode();
+      musicUnmute();
       const song = nextFreezeSong();
       const startAt = energeticStartSeconds(song);
       loadFreezeVideo(song, true, startAt);
-      musicUnmute();
-      try {
-        if (ytPlayer && musicReady) {
-          ytPlayer.playVideo();
-          ytPlayer.unMute();
-          musicPlaying = true;
-          updateMiniUI();
-        } else {
-          musicPlay();
-        }
-      } catch (_) {
-        musicPlay();
-      }
     } else {
       el.textContent = '❄️ FREEZE!';
       el.classList.add('frozen');
@@ -1103,23 +1124,16 @@
     updateMiniUI();
     updatePotatoSongLabel();
     const startAt = typeof startSeconds === 'number' ? startSeconds : energeticStartSeconds(song);
-    if (!musicReady || !ytPlayer) {
-      if (autoplay) pendingPlay = true;
-      toast('Loading audio… tap Start Round again in a sec');
-      return false;
-    }
-    try {
-      if (autoplay) {
-        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: startAt });
-        pendingPlay = true;
-      } else {
+    if (!autoplay) {
+      if (!musicReady || !ytPlayer) return false;
+      try {
         ytPlayer.cueVideoById({ videoId: song.youtubeId, startSeconds: startAt });
+        return true;
+      } catch (e) {
+        return false;
       }
-      return true;
-    } catch (e) {
-      toast('Could not load potato track');
-      return false;
     }
+    return loadAndPlayYt(song.youtubeId, startAt);
   }
 
   function updatePotatoSongLabel() {
@@ -1182,21 +1196,8 @@
     timerEl.textContent = 'Music on — stop is secret';
     timerEl.classList.remove('flash-stop');
 
-    loadPotatoVideo(song, true, startAt);
     musicUnmute();
-    // Ensure play after load
-    try {
-      if (ytPlayer && musicReady) {
-        ytPlayer.playVideo();
-        ytPlayer.unMute();
-        musicPlaying = true;
-        updateMiniUI();
-      } else {
-        musicPlay();
-      }
-    } catch (_) {
-      musicPlay();
-    }
+    loadPotatoVideo(song, true, startAt);
 
     setPotatoProgress(secs, true);
     updatePotatoStartLabel();
