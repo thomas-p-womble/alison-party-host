@@ -1122,61 +1122,61 @@ textarea {
   ];
 
   /* Host timing cards only — NO full copyrighted lyrics */
-  /* startAt/muteAt/unmuteAt = seconds for Auto Sing seek + mute window */
+  /* startAt/muteAt/unmuteAt = seconds; startAt 0 = from beginning; short hook mute (~8–12s) */
   const LYRIC_CUES = {
     1: {
-      play: 'Play verse vocals first',
-      mute: 'MUTE for first chorus / Texas hook',
-      kids: 'Kids shout the Texas hook',
-      startAt: 25, muteAt: 48, unmuteAt: 78
+      play: 'Play from the start (verse → chorus)',
+      mute: 'MUTE short “choosin’ Texas” hook',
+      kids: 'Kids shout the Texas hook (~10s)',
+      startAt: 0, muteAt: 68, unmuteAt: 78
     },
     2: {
-      play: 'Play verse → approach chorus',
-      mute: 'MUTE right before “you belong…”',
-      kids: 'Kids finish the chorus line',
-      startAt: 53, muteAt: 61, unmuteAt: 108
+      play: 'Play from the start',
+      mute: 'MUTE short “you belong with me” hook',
+      kids: 'Kids finish the hook line (~11s)',
+      startAt: 0, muteAt: 61, unmuteAt: 72
     },
     3: {
-      play: 'Play until the famous “bah bah bah”',
-      mute: 'MUTE — hands ready',
-      kids: 'Kids sing the bahs + “Sweet Caroline!”',
-      startAt: 55, muteAt: 63, unmuteAt: 123
+      play: 'Play from the start',
+      mute: 'MUTE “Sweet Caroline” + bahs',
+      kids: 'Kids sing the bahs + title (~12s)',
+      startAt: 0, muteAt: 63, unmuteAt: 75
     },
     4: {
-      play: 'Play the iconic guitar riff in',
-      mute: 'MUTE before the title line',
-      kids: 'Kids belt “Eye of the Tiger!”',
-      startAt: 75, muteAt: 83, unmuteAt: 141
+      play: 'Play from the start (riff in)',
+      mute: 'MUTE short title hook',
+      kids: 'Kids belt “Eye of the Tiger!” (~12s)',
+      startAt: 0, muteAt: 83, unmuteAt: 95
     },
     5: {
-      play: 'Play into the big chorus',
-      mute: 'MUTE before “don’t stop…”',
-      kids: 'Kids finish “Don’t Stop Believin’!”',
-      startAt: 195, muteAt: 203, unmuteAt: 250
+      play: 'Play from the start (long build)',
+      mute: 'MUTE short “don’t stop believin’” hook',
+      kids: 'Kids finish the title hook (~11s)',
+      startAt: 0, muteAt: 203, unmuteAt: 214
     },
     6: {
-      play: 'Play toward the “twenty-two” hook',
-      mute: 'MUTE NOW',
-      kids: 'Kids shout “22!” / finish the line',
-      startAt: 34, muteAt: 42, unmuteAt: 68
+      play: 'Play from the start',
+      mute: 'MUTE short “feeling 22” hook',
+      kids: 'Kids shout “22!” (~12s)',
+      startAt: 0, muteAt: 42, unmuteAt: 54
     },
     7: {
-      play: 'Play into the roar chorus',
-      mute: 'MUTE before the roar',
-      kids: 'Kids ROAR / finish the chorus',
-      startAt: 37, muteAt: 45, unmuteAt: 70
+      play: 'Play from the start',
+      mute: 'MUTE short “hear me roar” hook',
+      kids: 'Kids ROAR the hook (~12s)',
+      startAt: 0, muteAt: 52, unmuteAt: 64
     },
     8: {
-      play: 'Play into “party in the USA”',
-      mute: 'MUTE NOW',
-      kids: 'Kids finish “Party in the USA!”',
-      startAt: 36, muteAt: 44, unmuteAt: 72
+      play: 'Play from the start',
+      mute: 'MUTE short “party in the USA” hook',
+      kids: 'Kids finish the title hook (~12s)',
+      startAt: 0, muteAt: 56, unmuteAt: 68
     },
     9: {
-      play: 'Play into “shake it off”',
-      mute: 'MUTE before the title hook',
-      kids: 'Kids shake + finish the line',
-      startAt: 33, muteAt: 41, unmuteAt: 72
+      play: 'Play from the start',
+      mute: 'MUTE short “shake it off” hook',
+      kids: 'Kids shake + finish the hook (~12s)',
+      startAt: 0, muteAt: 48, unmuteAt: 60
     }
   };
 
@@ -1644,7 +1644,7 @@ textarea {
       cd.className = 'lyric-countdown waiting';
     } else if (autoSingPhase === 'muted') {
       const left = Math.max(0, Math.ceil(cue.unmuteAt - t));
-      cd.textContent = 'Chorus mute ' + formatMmSs(cue.muteAt) + '–' + formatMmSs(cue.unmuteAt) +
+      cd.textContent = 'Hook mute ' + formatMmSs(cue.muteAt) + '–' + formatMmSs(cue.unmuteAt) +
         ' · kids sing (' + left + 's)';
       cd.className = 'lyric-countdown muted-now';
     } else if (autoSingPhase === 'done') {
@@ -1965,8 +1965,8 @@ textarea {
     document.getElementById('lyric-song').textContent =
       (state.lyricIndex + 1) + '. ' + song.title + (song.artist ? ' — ' + song.artist : '');
     const timingHint = (cue.startAt != null)
-      ? '<p class="cue-timing">Chorus mute ' + formatMmSs(cue.muteAt) + '–' + formatMmSs(cue.unmuteAt) +
-        ' · seek ' + formatMmSs(cue.startAt) + '</p>'
+      ? '<p class="cue-timing">Hook mute ' + formatMmSs(cue.muteAt) + '–' + formatMmSs(cue.unmuteAt) +
+        (cue.startAt === 0 ? ' · from start' : ' · seek ' + formatMmSs(cue.startAt)) + '</p>'
       : '';
     document.getElementById('lyric-steps').innerHTML =
       timingHint +

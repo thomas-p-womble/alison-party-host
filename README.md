@@ -64,7 +64,7 @@ Audio dock: **Play/Pause · Mute/Unmute · Prev/Next · title**. Games use the s
 |--------|----------------|
 | **Name That Tune** | Teams A/B/C scores, first-tap buzz, play/pause clip |
 | **3-2-1 Show** | Wipe-board reveal countdown |
-| **Sing-Along Cue** | **Auto Sing** seeks + mute/unmute on timer; manual MUTE override (no full lyrics) |
+| **Sing-Along Cue** | **Auto Sing** starts each song from the beginning, mutes only a short chorus hook (~8–12s), then unmutes; manual MUTE override (no full lyrics) |
 | **Freeze Dance** | PLAY / FREEZE controls in-app music + eliminate counter |
 | **Hot Potato / Prize Pass** | Random 8–25s stop (plays/pauses music) |
 | **Alison Quizmaster** | Rotates who asks next; editable roster |
@@ -89,6 +89,7 @@ alison-party-host/
 
 - Scores and roster persist via `localStorage`.
 - Sing-along mode never stores copyrighted lyric text — only host mute/finish cues.
+- **Auto Sing:** songs always `startAt = 0` (from the beginning). Only a short catchy hook is muted (~8–12 seconds), then audio unmutes automatically.
 - Keep the phone awake / plugged in during the party.
 
 Party ASAP. Have fun! 🎉
