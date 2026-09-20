@@ -922,6 +922,42 @@ textarea {
   z-index: 5;
 }
 
+.how-to {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+}
+.how-title {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--pink);
+}
+.how-to ol, .how-to ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+.how-to li {
+  margin: 0.35rem 0;
+  line-height: 1.35;
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+.how-to p {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.game-legend {
+  list-style: none;
+  padding-left: 0;
+}
+.game-legend li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(155, 126, 200, 0.25);
+}
+.game-legend li:last-child { border-bottom: 0; }
+
 </style>
 </head>
 <body>
@@ -967,9 +1003,23 @@ textarea {
         <p id="local-audio-status">Optional</p>
       </div>
 
+      
+      <div class="card how-to" id="games-legend">
+        <p class="how-title">What each game is</p>
+        <ul class="game-legend">
+          <li><strong>Name That Tune</strong> — play a clip; teams buzz in</li>
+          <li><strong>Write &amp; Show</strong> — everyone writes, then reveal together on 3-2-1</li>
+          <li><strong>Sing-Along</strong> — mute the hook so kids sing</li>
+          <li><strong>Freeze Dance</strong> — dance / freeze when music stops</li>
+          <li><strong>Hot Potato</strong> — pass a prize; music stops at random</li>
+          <li><strong>Quizmaster</strong> — whose turn to ask</li>
+          <li><strong>Alison Quiz</strong> — “How well do you know Alison?”</li>
+        </ul>
+      </div>
+
       <nav class="game-grid" aria-label="Games">
         <button class="game-btn" data-view="name-tune">🎵 Name That Tune</button>
-        <button class="game-btn" data-view="wipe">📋 3-2-1 Show</button>
+        <button class="game-btn" data-view="wipe">📋 Write &amp; Show</button>
         <button class="game-btn" data-view="lyrics">🎤 Sing-Along Cue</button>
         <button class="game-btn" data-view="freeze">❄️ Freeze Dance</button>
         <button class="game-btn" data-view="potato">🥔 Hot Potato</button>
@@ -980,7 +1030,7 @@ textarea {
 
       <footer class="home-foot">
         <button type="button" id="btn-reset-scores" class="linkish">Reset all scores</button>
-        <p class="hint">Safari → Share → Add to Home Screen</p>
+        <p class="hint">Keep this open in <strong>Safari</strong> for YouTube Premium (don’t use a Home Screen icon).</p>
       </footer>
     </section>
 
@@ -998,7 +1048,16 @@ textarea {
           <button type="button" id="ntt-pause" class="btn secondary">⏸ Pause</button>
         </div>
       </div>
-      <p class="coach" style="margin-top:0">First team to tap wins the buzz:</p>
+      <div class="card how-to">
+        <p class="how-title">How to run Name That Tune</p>
+        <ol>
+          <li>Split into teams A / B / C</li>
+          <li>Tap <strong>Play clip</strong> (short bit of the song)</li>
+          <li>First team to hit their buzz button wins the chance to name it</li>
+          <li>Use + / − under team scores; <strong>Next</strong> for the next song</li>
+        </ol>
+      </div>
+      <p class="coach" style="margin-top:0">Buzz buttons:</p>
       <div class="buzz-grid" id="ntt-buzz-grid">
         <button type="button" class="mega buzz team-buzz" data-team="A">🔔 A</button>
         <button type="button" class="mega buzz team-buzz" data-team="B">🔔 B</button>
@@ -1013,20 +1072,28 @@ textarea {
       <button type="button" id="ntt-clear-buzz" class="btn ghost">Clear buzz</button>
     </section>
 
-    <!-- WIPE BOARD 3-2-1 -->
+    <!-- WRITE & SHOW (wipe boards) -->
     <section id="view-wipe" class="view">
       <header class="view-bar">
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
-        <h1>3-2-1 Show</h1>
+        <h1>Write &amp; Show</h1>
       </header>
-      <p class="coach">Kids write answer on wipe board. Host counts down. Reveal together!</p>
+      <div class="card how-to">
+        <p class="how-title">What is this?</p>
+        <p>Every girl writes the answer on a wipe board / sticky note (no buzzing). When you hit the button, the phone counts <strong>3 · 2 · 1 · SHOW!</strong> and everyone holds up their board at once. Award points to everyone who’s right.</p>
+        <p class="how-title">How to run it</p>
+        <ol>
+          <li>Give each girl a wipe board + marker (or sticky + pen)</li>
+          <li>Ask a question (or play a short Name That Tune clip)</li>
+          <li>Give ~15 seconds to write</li>
+          <li>Tap <strong>3 · 2 · 1 · SHOW!</strong></li>
+          <li>Kids flip boards up together — you score</li>
+        </ol>
+      </div>
       <div id="wipe-display" class="countdown-display">Ready</div>
       <div class="row-btns stack">
         <button type="button" id="wipe-go" class="mega">3 · 2 · 1 · SHOW!</button>
         <button type="button" id="wipe-reset" class="btn secondary">Reset</button>
-      </div>
-      <div class="card tip">
-        <strong>Host tip:</strong> Pause music, say the prompt, give ~15s to write, then hit the button.
       </div>
     </section>
 
@@ -1036,7 +1103,15 @@ textarea {
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
         <h1>Sing-Along Cue</h1>
       </header>
-      <p class="coach">Host mute for kids to sing the hook — no full lyrics. Big MUTE / UNMUTE (same as bottom 🔊) — song keeps playing while muted.</p>
+      <div class="card how-to">
+        <p class="how-title">How to run Sing-Along</p>
+        <ol>
+          <li>Tap <strong>PLAY FROM START</strong></li>
+          <li>When the catchy line is coming, tap <strong>MUTE</strong> — kids sing</li>
+          <li>Tap <strong>UNMUTE</strong> when they’re done (song kept playing silently)</li>
+          <li>Same mute as the bottom dock 🔊</li>
+        </ol>
+      </div>
       <div class="card cue-card">
         <p class="label">Song</p>
         <p id="lyric-song" class="song-title">—</p>
@@ -1059,7 +1134,15 @@ textarea {
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
         <h1>Freeze Dance</h1>
       </header>
-      <p class="coach">Separate dance playlist (not Music Game / not Hot Potato). PLAY loads a tween hit mid-song; FREEZE pauses.</p>
+      <div class="card how-to">
+        <p class="how-title">How to run Freeze Dance</p>
+        <ol>
+          <li>Kids dance while music plays</li>
+          <li>Tap <strong>PLAY</strong> — starts a dance song</li>
+          <li>Tap <strong>FREEZE</strong> — music pauses; anyone still moving is out</li>
+          <li>Tap <strong>Eliminate 1</strong> when someone moves; repeat until a winner</li>
+        </ol>
+      </div>
       <div id="freeze-status" class="countdown-display dance">💃 DANCE!</div>
       <div class="row-btns">
         <button type="button" id="freeze-play" class="mega play">▶ PLAY</button>
@@ -1084,7 +1167,15 @@ textarea {
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
         <h1>Hot Potato / Prize Pass</h1>
       </header>
-      <p class="coach">Auto music — separate tween playlist (not the sing-along nine). Tap Start Round; music stops itself.</p>
+      <div class="card how-to">
+        <p class="how-title">How to run Hot Potato / Prize Pass</p>
+        <ol>
+          <li>Kids pass a prize/potato while music plays</li>
+          <li>Tap <strong>Start Round</strong> — music plays ~15–20s then stops by itself</li>
+          <li>Whoever is holding it when it stops is out (or wins that prize)</li>
+          <li>Tap <strong>Next Round</strong> for another song</li>
+        </ol>
+      </div>
       <div id="potato-status" class="countdown-display potato">🥔 Ready</div>
       <p id="potato-song" class="potato-song">—</p>
       <div id="potato-progress-wrap" class="potato-progress-wrap hidden" aria-hidden="true">
@@ -1107,7 +1198,14 @@ textarea {
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
         <h1>Alison Quizmaster</h1>
       </header>
-      <p class="coach">Rotate who asks the next question. Birthday girl goes first!</p>
+      <div class="card how-to">
+        <p class="how-title">How to run Quizmaster</p>
+        <ol>
+          <li>Alison (or the name shown) asks the next question</li>
+          <li>Tap <strong>Next quizmaster</strong> to rotate who asks</li>
+          <li>Edit the roster below if you want guest names too</li>
+        </ol>
+      </div>
       <div id="qm-name" class="countdown-display qm">Alison 👑</div>
       <div class="row-btns">
         <button type="button" id="qm-next" class="mega">Next quizmaster →</button>
@@ -1131,7 +1229,14 @@ textarea {
         <p id="trivia-question" class="quiz-question">—</p>
         <div id="trivia-choices" class="quiz-choices hidden" aria-label="Guest choice prompts"></div>
       </div>
-      <p class="coach">Open-ended — Alison/host judges live. Tap +1 when you accept a team’s answer.</p>
+      <div class="card how-to">
+        <p class="how-title">How to run Alison Quiz</p>
+        <ol>
+          <li>Read the question out loud (How Well Do You Know Alison?)</li>
+          <li>Teams guess — you and Alison decide who’s right</li>
+          <li>Tap <strong>+1</strong> for that team; <strong>Next</strong> for the next question</li>
+        </ol>
+      </div>
       <div class="row-btns">
         <button type="button" id="trivia-prev" class="btn secondary">← Prev</button>
         <button type="button" id="trivia-next" class="btn primary">Next →</button>

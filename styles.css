@@ -905,3 +905,39 @@ textarea {
   position: relative;
   z-index: 5;
 }
+
+.how-to {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+}
+.how-title {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--pink);
+}
+.how-to ol, .how-to ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+.how-to li {
+  margin: 0.35rem 0;
+  line-height: 1.35;
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+.how-to p {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.game-legend {
+  list-style: none;
+  padding-left: 0;
+}
+.game-legend li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(155, 126, 200, 0.25);
+}
+.game-legend li:last-child { border-bottom: 0; }
