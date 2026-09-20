@@ -110,19 +110,16 @@
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
         <h1>Sing-Along Cue</h1>
       </header>
-      <p class="coach">Host timing only — no full lyrics. Auto Sing mutes &amp; unmutes on a timer; kids finish the line.</p>
+      <p class="coach">Host mute for kids to sing the hook — no full lyrics. One big MUTE / UNMUTE button.</p>
       <div class="card cue-card">
         <p class="label">Song</p>
         <p id="lyric-song" class="song-title">—</p>
-        <div id="lyric-countdown" class="lyric-countdown" aria-live="polite"></div>
         <div id="lyric-steps" class="cue-steps"></div>
       </div>
       <div class="row-btns stack">
-        <button type="button" id="lyric-auto" class="mega auto-sing">🎤 Auto Sing</button>
-        <p class="auto-sing-note">Timings matched to standard studio/Topic audio; if a Topic upload has silence padding, use Manual mute.</p>
-        <button type="button" id="lyric-play" class="mega play">▶ PLAY</button>
-        <button type="button" id="lyric-mute" class="mega freeze">🔇 MUTE NOW</button>
-        <button type="button" id="lyric-unmute" class="btn secondary">🔊 Unmute</button>
+        <button type="button" id="lyric-mute-toggle" class="mega mute-toggle is-unmuted" aria-pressed="false">🔇 MUTE</button>
+        <p id="lyric-mute-status" class="mute-status" aria-live="polite">Playing</p>
+        <button type="button" id="lyric-play" class="mega play">▶ PLAY FROM START</button>
       </div>
       <div class="row-btns">
         <button type="button" id="lyric-prev" class="btn secondary">◀ Prev</button>

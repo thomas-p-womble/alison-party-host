@@ -56,7 +56,7 @@ YouTube iframe is **visually hidden** (audio only). Prefer Topic / Official Audi
 
 **Local audio:** use **Load my song files** (purchased tracks) or place numbered files in the same folder when serving over HTTP — local wins over YouTube.
 
-Audio dock: **Play/Pause · Mute/Unmute · Prev/Next · title**. Games use the same player (Freeze = pause, Lyric MUTE NOW = mute, Hot Potato stop = pause).
+Audio dock: **Play/Pause · Mute/Unmute · Prev/Next · title**. Games use the same player (Freeze = pause, Sing-Along mega MUTE = mute, Hot Potato stop = pause).
 
 ## Games
 
@@ -64,7 +64,7 @@ Audio dock: **Play/Pause · Mute/Unmute · Prev/Next · title**. Games use the s
 |--------|----------------|
 | **Name That Tune** | Teams A/B/C scores, first-tap buzz, play/pause clip |
 | **3-2-1 Show** | Wipe-board reveal countdown |
-| **Sing-Along Cue** | **Auto Sing** starts each song from the beginning, mutes only the catchiest shout/title hook (~3–8s), then unmutes; manual MUTE override (no full lyrics) |
+| **Sing-Along Cue** | One huge **MUTE ↔ UNMUTE** button for kids to sing the hook; Play from start + Prev/Next (no full lyrics) |
 | **Freeze Dance** | PLAY / FREEZE controls in-app music + eliminate counter |
 | **Hot Potato / Prize Pass** | Auto music from separate tween playlist; random 8–22s secret stop |
 | **Alison Quizmaster** | Rotates who asks next; editable roster |
@@ -89,7 +89,7 @@ alison-party-host/
 
 - Scores and roster persist via `localStorage`.
 - Sing-along mode never stores copyrighted lyric text — only host mute/finish cues.
-- **Auto Sing:** songs always `startAt = 0` (from the beginning). Only a short catchy hook is muted (~8–12 seconds), then audio unmutes automatically.
+- **Sing-Along:** one thumb-friendly MUTE/UNMUTE toggle; song change (prev/next) auto-unmutes so the next track starts audible.
 - Keep the phone awake / plugged in during the party.
 
 Party ASAP. Have fun! 🎉
