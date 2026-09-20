@@ -22,10 +22,10 @@
   /* startAt/muteAt/unmuteAt = seconds for Auto Sing seek + mute window */
   const LYRIC_CUES = {
     1: {
-      play: 'Play opening / chorus energy',
-      mute: 'MUTE NOW before the big shout line',
-      kids: 'Kids finish / shout the Texas hook',
-      startAt: 35, muteAt: 43, unmuteAt: 75
+      play: 'Play verse vocals first',
+      mute: 'MUTE for first chorus / Texas hook',
+      kids: 'Kids shout the Texas hook',
+      startAt: 25, muteAt: 48, unmuteAt: 78
     },
     2: {
       play: 'Play verse → approach chorus',
@@ -106,7 +106,7 @@
   let musicPlaying = false;
   let pendingPlay = false;
   let autoSingTimer = null;
-  let autoSingPhase = 'idle'; /* idle | playing | muted | done */
+  let autoSingPhase = 'idle'; /* idle | seeking | playing | muted | done */
   let autoSingSongId = null;
   /** @type {HTMLAudioElement|null} */
   let htmlAudio = null;
@@ -422,6 +422,9 @@
     if (htmlAudio) htmlAudio.muted = false;
     if (ytPlayer && musicReady) {
       try { ytPlayer.unMute(); } catch (_) {}
+      try {
+        if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(100);
+      } catch (_) {}
     }
     updateMiniUI();
   }
@@ -506,7 +509,10 @@
   function updateAutoSingCountdown(cue, t) {
     const cd = document.getElementById('lyric-countdown');
     if (!cd) return;
-    if (autoSingPhase === 'playing') {
+    if (autoSingPhase === 'seeking') {
+      cd.textContent = 'Seeking…';
+      cd.className = 'lyric-countdown waiting';
+    } else if (autoSingPhase === 'playing') {
       const left = Math.max(0, Math.ceil(cue.muteAt - t));
       cd.textContent = 'Mute in ' + left + 's';
       cd.className = 'lyric-countdown waiting';
@@ -536,31 +542,49 @@
     }
 
     autoSingSongId = song.id;
-    autoSingPhase = 'playing';
+    autoSingPhase = 'seeking';
     const btn = document.getElementById('lyric-auto');
     if (btn) btn.classList.add('running');
 
     musicUnmute();
     musicSeek(cue.startAt);
     musicPlay();
-    /* Seek again after play starts (YT sometimes ignores pre-play seek) */
-    setTimeout(() => musicSeek(cue.startAt), 120);
     setCueHighlight('playing');
     updateAutoSingCountdown(cue, cue.startAt);
-    toast('Auto Sing — seek to ' + cue.startAt + 's');
+    toast('Auto Sing — seeking to ' + formatMmSs(cue.startAt));
     tryVibrate(30);
 
+    const startAt = cue.startAt;
+    const SEEK_TOLERANCE = 8; /* player time within this of startAt = confirmed */
+    const SEEK_RETRY_MS = 400;
+    const SEEK_GIVE_UP_MS = 5000;
+    const seekBegunAt = Date.now();
+    let lastSeekAt = 0;
+    let seekConfirmed = false;
+    let confirmedWallStart = 0;
     let didMute = false;
     let didUnmute = false;
-    const wallStart = Date.now();
-    const startAt = cue.startAt;
+
+    function forceUnmuteAndPlay() {
+      musicUnmute();
+      try {
+        if (ytPlayer && musicReady && typeof ytPlayer.setVolume === 'function') {
+          ytPlayer.setVolume(100);
+        }
+      } catch (_) {}
+      musicPlay();
+    }
 
     function effectiveTime() {
-      const raw = getMusicTime();
-      const wall = startAt + (Date.now() - wallStart) / 1000;
-      /* Trust player time only when it looks like we landed near the cue window */
-      if (raw >= startAt - 5 && raw <= cue.unmuteAt + 30) return raw;
-      return wall;
+      const playerTime = getMusicTime();
+      if (!seekConfirmed) return playerTime;
+      const wall = startAt + (Date.now() - confirmedWallStart) / 1000;
+      /* Stalled YT getCurrentTime must never block unmute */
+      return Math.max(playerTime, wall);
+    }
+
+    function isSeekLanded(raw) {
+      return raw >= startAt - SEEK_TOLERANCE && raw <= startAt + SEEK_TOLERANCE;
     }
 
     autoSingTimer = setInterval(() => {
@@ -568,6 +592,40 @@
         stopAutoSing();
         return;
       }
+
+      const now = Date.now();
+      const raw = getMusicTime();
+
+      /* —— Phase: seeking (no mute until seek confirmed) —— */
+      if (!seekConfirmed) {
+        if (isSeekLanded(raw)) {
+          seekConfirmed = true;
+          confirmedWallStart = Date.now();
+          autoSingPhase = 'playing';
+          setCueHighlight('playing');
+          updateAutoSingCountdown(cue, raw);
+          toast('Auto Sing — ready at ' + formatMmSs(Math.floor(raw)));
+          return;
+        }
+
+        if (now - seekBegunAt >= SEEK_GIVE_UP_MS) {
+          toast('Seek failed — music keeps playing unmuted');
+          forceUnmuteAndPlay();
+          stopAutoSing();
+          return;
+        }
+
+        if (now - lastSeekAt >= SEEK_RETRY_MS) {
+          lastSeekAt = now;
+          musicSeek(startAt);
+          musicPlay();
+        }
+        autoSingPhase = 'seeking';
+        updateAutoSingCountdown(cue, raw);
+        return;
+      }
+
+      /* —— Phase: running after confirmed seek —— */
       const t = effectiveTime();
       if (!didMute && t >= cue.muteAt) {
         didMute = true;
@@ -580,9 +638,7 @@
       if (didMute && !didUnmute && t >= cue.unmuteAt) {
         didUnmute = true;
         autoSingPhase = 'done';
-        musicUnmute();
-        /* Keep playing — do not pause after chorus mute window */
-        musicPlay();
+        forceUnmuteAndPlay();
         setCueHighlight('done');
         toast('Unmuted — music continues!');
         tryVibrate(30);
