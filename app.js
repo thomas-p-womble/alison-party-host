@@ -540,6 +540,17 @@
     updateMiniUI();
   }
 
+
+  function getMusicTime() {
+    try {
+      if (usingLocal && htmlAudio) return Number(htmlAudio.currentTime) || 0;
+      if (ytPlayer && musicReady && typeof ytPlayer.getCurrentTime === 'function') {
+        return Number(ytPlayer.getCurrentTime()) || 0;
+      }
+    } catch (_) {}
+    return 0;
+  }
+
   function musicToggleMute() {
     if (musicMuted) musicUnmute();
     else musicMute();
@@ -562,21 +573,25 @@
       }
     }
     if (status) {
-      status.textContent = musicMuted ? 'Muted — kids sing (track advancing)' : 'Playing';
+      status.textContent = musicMuted ? 'Muted — song still playing (silent)' : 'Playing';
       status.classList.toggle('is-muted', musicMuted);
     }
   }
 
   /*
-   * Sing-along MUTE: YouTube mute() is laggy on iPhone, but pause alone freezes the song.
-   * Instant silence via pause; on UNMUTE seek forward by wall-clock mute duration so the
-   * catchy chorus has already passed — same end result as a real mute.
+   * Sing-along MUTE must KEEP THE TRACK RUNNING (kids sing over silence; unmute
+   * lands after the hook). YouTube mute can lag on iPhone — we still use real
+   * mute/volume-0 (not pause). UI flips instantly on pointerdown.
+   * Seek-forward on unmute is a safety net if the player was paused somehow.
    */
+  let lyricCutUsedPause = false;
+
   function lyricToggleMute() {
     if (musicMuted) {
       const elapsed = Math.max(0, (Date.now() - lyricCutWallStart) / 1000);
-      const target = lyricCutMediaAt + elapsed;
+      const target = (Number(lyricCutMediaAt) || 0) + elapsed;
       musicMuted = false;
+      /* Unmute volume first */
       if (htmlAudio) {
         htmlAudio.muted = false;
         htmlAudio.volume = 1;
@@ -584,6 +599,7 @@
       if (ytPlayer && musicReady) {
         try { if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(100); } catch (_) {}
         try { ytPlayer.unMute(); } catch (_) {}
+        /* Always nudge position forward by mute duration so we never land on the hook again */
         try { ytPlayer.seekTo(target, true); } catch (_) {}
         try { ytPlayer.playVideo(); } catch (_) {}
       }
@@ -592,31 +608,39 @@
         try { htmlAudio.play(); } catch (_) {}
       }
       musicPlaying = true;
+      lyricCutUsedPause = false;
       updateLyricMuteUI();
       updateMiniUI();
       setCueHighlight('done');
       tryVibrate(20);
+      toast('Unmuted (+' + Math.round(elapsed) + 's)');
     } else {
       lyricCutWallStart = Date.now();
       lyricCutMediaAt = getMusicTime();
+      lyricCutUsedPause = false;
       musicMuted = true;
-      if (ytPlayer && musicReady) {
-        try { ytPlayer.pauseVideo(); } catch (_) {}
-        try { if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(0); } catch (_) {}
-        try { ytPlayer.mute(); } catch (_) {}
-      }
+      /* Instant UI, then real mute — do NOT pause */
+      updateLyricMuteUI();
+      setCueHighlight('muted');
+      tryVibrate(15);
       if (htmlAudio) {
-        try { htmlAudio.pause(); } catch (_) {}
         htmlAudio.muted = true;
         htmlAudio.volume = 0;
       }
-      musicPlaying = false;
-      updateLyricMuteUI();
+      if (ytPlayer && musicReady) {
+        try { if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(0); } catch (_) {}
+        try { ytPlayer.mute(); } catch (_) {}
+        /* Keep playing through the mute window */
+        try { ytPlayer.playVideo(); } catch (_) {}
+      }
+      if (htmlAudio && usingLocal) {
+        try { htmlAudio.play(); } catch (_) {}
+      }
+      musicPlaying = true;
       updateMiniUI();
-      setCueHighlight('muted');
-      tryVibrate(25);
     }
   }
+
 
   /** Instant press (pointerdown) — mute on DOWN, swallow follow-up click. */
   function bindInstantPress(el, handler) {
