@@ -160,16 +160,20 @@
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
         <h1>Hot Potato / Prize Pass</h1>
       </header>
-      <p class="coach">Pass the prize while music plays. When it stops — that kid wins (or is out)!</p>
-      <div id="potato-status" class="countdown-display potato">🥔 Pass it!</div>
-      <p id="potato-timer" class="timer-readout">—</p>
+      <p class="coach">Auto music — separate tween playlist (not the sing-along nine). Tap Start Round; music stops itself.</p>
+      <div id="potato-status" class="countdown-display potato">🥔 Ready</div>
+      <p id="potato-song" class="potato-song">—</p>
+      <div id="potato-progress-wrap" class="potato-progress-wrap hidden" aria-hidden="true">
+        <div id="potato-progress" class="potato-progress"></div>
+      </div>
+      <p id="potato-timer" class="timer-readout">Tap Start Round</p>
       <div class="row-btns stack">
-        <button type="button" id="potato-start" class="mega">▶ Start random stop</button>
+        <button type="button" id="potato-start" class="mega">▶ Start Round</button>
         <button type="button" id="potato-stop" class="mega freeze">STOP NOW</button>
         <button type="button" id="potato-reset" class="btn secondary">Reset</button>
       </div>
       <div class="card tip">
-        Random stop between <strong>8–25 seconds</strong>. Start plays music in-app; stop pauses it.
+        Auto-stop <strong>8–22s</strong> (secret — no countdown for the room). Separate tween hits; Music Game playlist untouched. STOP NOW is host override only.
       </div>
     </section>
 

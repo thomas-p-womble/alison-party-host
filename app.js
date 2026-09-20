@@ -18,62 +18,78 @@
     { id: 9, title: 'Shake It Off', artist: 'Taylor Swift', youtubeId: 'H59xVMF4zxE', localKey: '09-shake-it-off' }
   ];
 
+  /* Hot Potato / Prize Pass — separate tween playlist (NOT Music Game nine). Prefer Topic / Official Audio. */
+  const POTATO_PLAYLIST = [
+    { id: 'p1', title: 'Espresso', artist: 'Sabrina Carpenter', youtubeId: '51zjlMhdSTE' },
+    { id: 'p2', title: 'HOT TO GO!', artist: 'Chappell Roan', youtubeId: 'GJAt8bqW00E' },
+    { id: 'p3', title: 'APT.', artist: 'ROSÉ & Bruno Mars', youtubeId: '8Ebqe2Dbzls' },
+    { id: 'p4', title: 'Birds of a Feather', artist: 'Billie Eilish', youtubeId: 'd5gf9dXbPi0' },
+    { id: 'p5', title: 'Dance the Night', artist: 'Dua Lipa', youtubeId: 'OiC1rgCPmUQ' },
+    { id: 'p6', title: 'Levitating', artist: 'Dua Lipa', youtubeId: 'OsfAnsMY21M' },
+    { id: 'p7', title: 'Sunroof', artist: 'Nicky Youre / dazy', youtubeId: 'eZCWyFNV_ZM' },
+    { id: 'p8', title: 'Dynamite', artist: 'BTS', youtubeId: 'NvK9APEhcdk' },
+    { id: 'p9', title: 'As It Was', artist: 'Harry Styles', youtubeId: 'wa5gkHMqbls' },
+    { id: 'p10', title: 'Cruel Summer', artist: 'Taylor Swift', youtubeId: 'ic8j13piAhQ' },
+    { id: 'p11', title: 'Flowers', artist: 'Miley Cyrus', youtubeId: 'BkSSOGNeWTM' },
+    { id: 'p12', title: 'What Makes You Beautiful', artist: 'One Direction', youtubeId: 'd57qSDCxVA4' }
+  ];
+
   /* Host timing cards only — NO full copyrighted lyrics */
-  /* startAt/muteAt/unmuteAt = seconds; startAt 0 = from beginning; short hook mute (~8–12s) */
+  /* startAt/muteAt/unmuteAt = seconds; startAt 0 = from beginning; catchiest shout/title hook only (~3–8s) */
   const LYRIC_CUES = {
     1: {
       play: 'Play from the start (verse → chorus)',
-      mute: 'MUTE short “choosin’ Texas” hook',
-      kids: 'Kids shout the Texas hook (~10s)',
-      startAt: 0, muteAt: 68, unmuteAt: 78
+      mute: 'MUTE “choosin’ Texas” shout hook',
+      kids: 'Kids shout “choosin’ Texas!” (~6s)',
+      startAt: 0, muteAt: 70, unmuteAt: 76
     },
     2: {
       play: 'Play from the start',
-      mute: 'MUTE short “you belong with me” hook',
-      kids: 'Kids finish the hook line (~11s)',
-      startAt: 0, muteAt: 61, unmuteAt: 72
+      mute: 'MUTE “you belong with me” hook',
+      kids: 'Kids finish “you belong with me” (~5s)',
+      startAt: 0, muteAt: 61, unmuteAt: 66
     },
     3: {
       play: 'Play from the start',
-      mute: 'MUTE “Sweet Caroline” + bahs',
-      kids: 'Kids sing the bahs + title (~12s)',
-      startAt: 0, muteAt: 63, unmuteAt: 75
+      mute: 'MUTE “Sweet Caroline” title hook',
+      kids: 'Kids shout “Sweet Caroline!” (~5s)',
+      startAt: 0, muteAt: 63, unmuteAt: 68
     },
     4: {
       play: 'Play from the start (riff in)',
-      mute: 'MUTE short title hook',
-      kids: 'Kids belt “Eye of the Tiger!” (~12s)',
-      startAt: 0, muteAt: 83, unmuteAt: 95
+      mute: 'MUTE title line hook',
+      kids: 'Kids belt “Eye of the Tiger!” (~6s)',
+      startAt: 0, muteAt: 83, unmuteAt: 89
     },
     5: {
       play: 'Play from the start (long build)',
-      mute: 'MUTE short “don’t stop believin’” hook',
-      kids: 'Kids finish the title hook (~11s)',
-      startAt: 0, muteAt: 203, unmuteAt: 214
+      mute: 'MUTE “don’t stop believin’” hook',
+      kids: 'Kids finish “don’t stop believin’!” (~6s)',
+      startAt: 0, muteAt: 203, unmuteAt: 209
     },
     6: {
       play: 'Play from the start',
-      mute: 'MUTE short “feeling 22” hook',
-      kids: 'Kids shout “22!” (~12s)',
-      startAt: 0, muteAt: 42, unmuteAt: 54
+      mute: 'MUTE “feeling 22” hook',
+      kids: 'Kids shout “feeling 22!” (~5s)',
+      startAt: 0, muteAt: 44, unmuteAt: 49
     },
     7: {
       play: 'Play from the start',
-      mute: 'MUTE short “hear me roar” hook',
-      kids: 'Kids ROAR the hook (~12s)',
-      startAt: 0, muteAt: 52, unmuteAt: 64
+      mute: 'MUTE “hear me roar” hook',
+      kids: 'Kids ROAR “hear me roar!” (~5s)',
+      startAt: 0, muteAt: 55, unmuteAt: 60
     },
     8: {
       play: 'Play from the start',
-      mute: 'MUTE short “party in the USA” hook',
-      kids: 'Kids finish the title hook (~12s)',
-      startAt: 0, muteAt: 56, unmuteAt: 68
+      mute: 'MUTE “party in the USA” hook',
+      kids: 'Kids finish “party in the USA!” (~6s)',
+      startAt: 0, muteAt: 58, unmuteAt: 64
     },
     9: {
       play: 'Play from the start',
-      mute: 'MUTE short “shake it off” hook',
-      kids: 'Kids shake + finish the hook (~12s)',
-      startAt: 0, muteAt: 48, unmuteAt: 60
+      mute: 'MUTE “shake it off” hook',
+      kids: 'Kids shout “shake it off!” (~5s)',
+      startAt: 0, muteAt: 52, unmuteAt: 57
     }
   };
 
@@ -116,6 +132,12 @@
   let potatoTimer = null;
   let potatoDeadline = 0;
   let potatoTick = null;
+  let potatoMode = false;
+  let potatoSong = null;
+  let potatoOrder = [];
+  let potatoOrderIdx = 0;
+  let potatoSavedMusicIndex = null;
+  let potatoRoundActive = false;
   let timerSec = 60;
   let timerLeft = 60;
   let timerId = null;
@@ -180,16 +202,25 @@
     return PLAYLIST[i];
   }
 
+  function activePlaybackSong() {
+    if (potatoMode && potatoSong) return potatoSong;
+    return currentSong();
+  }
+
   function songLabel(song, index) {
     return (index + 1) + '. ' + song.title + (song.artist ? ' — ' + song.artist : '');
   }
 
   function updateMiniUI() {
-    const song = currentSong();
+    const song = activePlaybackSong();
     const titleEl = document.getElementById('mini-song-title');
     if (titleEl) {
-      const src = hasLocal(song) ? ' · local' : '';
-      titleEl.textContent = songLabel(song, state.musicIndex) + src;
+      if (potatoMode && potatoSong) {
+        titleEl.textContent = '🥔 ' + potatoSong.title + (potatoSong.artist ? ' — ' + potatoSong.artist : '');
+      } else {
+        const src = hasLocal(song) ? ' · local' : '';
+        titleEl.textContent = songLabel(song, state.musicIndex) + src;
+      }
     }
 
     const playBtn = document.getElementById('mini-play');
@@ -387,8 +418,8 @@
   }
 
   function musicPlay() {
-    const song = currentSong();
-    if (hasLocal(song)) {
+    const song = activePlaybackSong();
+    if (!potatoMode && hasLocal(song)) {
       usingLocal = true;
       pauseYouTube();
       const a = ensureHtmlAudio();
@@ -403,7 +434,11 @@
       return;
     }
 
-    if (!ensurePlayer(true)) return;
+    if (!musicReady || !ytPlayer) {
+      pendingPlay = true;
+      toast('Loading audio… tap Play again in a sec');
+      return;
+    }
     usingLocal = false;
     pauseHtmlAudio();
     try {
@@ -414,6 +449,8 @@
       ytPlayer.playVideo();
       if (musicMuted) ytPlayer.mute();
       else ytPlayer.unMute();
+      musicPlaying = true;
+      updateMiniUI();
     } catch (e) {
       toast('Play blocked — tap ▶ again');
     }
@@ -766,6 +803,8 @@
 
   function showView(id) {
     if (id !== 'lyrics') stopAutoSing();
+    const leavingPotato = id !== 'potato' && potatoMode;
+    if (leavingPotato) leavePotatoView();
     document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
     const view = document.getElementById('view-' + id);
     if (view) view.classList.add('active');
@@ -776,6 +815,10 @@
     if (id === 'quizmaster') renderQM();
     if (id === 'trivia') renderTrivia();
     if (id === 'timers') renderTimer();
+    if (id === 'potato') {
+      updatePotatoSongLabel();
+      updatePotatoStartLabel();
+    }
   }
 
   /* —— Home playlist —— */
@@ -1003,52 +1046,206 @@
     tick();
   }
 
-  /* —— Hot potato —— */
+  /* —— Hot potato (auto music, separate tween playlist) —— */
+  function shufflePotatoOrder() {
+    potatoOrder = POTATO_PLAYLIST.map((_, i) => i);
+    for (let i = potatoOrder.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = potatoOrder[i];
+      potatoOrder[i] = potatoOrder[j];
+      potatoOrder[j] = tmp;
+    }
+    potatoOrderIdx = 0;
+  }
+
+  function nextPotatoSong() {
+    if (!potatoOrder.length || potatoOrderIdx >= potatoOrder.length) {
+      shufflePotatoOrder();
+    }
+    const song = POTATO_PLAYLIST[potatoOrder[potatoOrderIdx]];
+    potatoOrderIdx += 1;
+    return song;
+  }
+
+  function enterPotatoMode() {
+    if (!potatoMode) {
+      potatoSavedMusicIndex = state.musicIndex;
+      potatoMode = true;
+      if (!potatoOrder.length) shufflePotatoOrder();
+    }
+  }
+
+  function loadPotatoVideo(song, autoplay) {
+    potatoSong = song;
+    usingLocal = false;
+    pauseHtmlAudio();
+    updateMiniUI();
+    updatePotatoSongLabel();
+    if (!musicReady || !ytPlayer) {
+      if (autoplay) pendingPlay = true;
+      toast('Loading audio… tap Start Round again in a sec');
+      return false;
+    }
+    try {
+      if (autoplay) {
+        ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: 0 });
+        pendingPlay = true;
+      } else {
+        ytPlayer.cueVideoById({ videoId: song.youtubeId, startSeconds: 0 });
+      }
+      return true;
+    } catch (e) {
+      toast('Could not load potato track');
+      return false;
+    }
+  }
+
+  function updatePotatoSongLabel() {
+    const el = document.getElementById('potato-song');
+    if (!el) return;
+    if (potatoSong) {
+      el.textContent = potatoSong.title + (potatoSong.artist ? ' — ' + potatoSong.artist : '');
+    } else {
+      el.textContent = '—';
+    }
+  }
+
+  function setPotatoProgress(secs, running) {
+    const bar = document.getElementById('potato-progress');
+    const wrap = document.getElementById('potato-progress-wrap');
+    if (!bar || !wrap) return;
+    bar.style.transition = 'none';
+    bar.style.width = '0%';
+    if (!running) {
+      wrap.classList.add('hidden');
+      return;
+    }
+    wrap.classList.remove('hidden');
+    void bar.offsetWidth;
+    bar.style.transition = 'width ' + secs + 's linear';
+    bar.style.width = '100%';
+  }
+
+  function updatePotatoStartLabel() {
+    const btn = document.getElementById('potato-start');
+    if (!btn) return;
+    if (potatoRoundActive) {
+      btn.textContent = '▶ Passing…';
+      btn.disabled = true;
+    } else if (potatoSong && document.getElementById('potato-status') &&
+               document.getElementById('potato-status').classList.contains('stopped')) {
+      btn.textContent = '▶ Next Round';
+      btn.disabled = false;
+    } else {
+      btn.textContent = '▶ Start Round';
+      btn.disabled = false;
+    }
+  }
+
   function startPotato() {
-    clearPotato();
-    const secs = 8 + Math.floor(Math.random() * 18); // 8–25
+    clearPotatoTimers();
+    enterPotatoMode();
+    const song = nextPotatoSong();
+    const secs = 8 + Math.floor(Math.random() * 15); // 8–22
     potatoDeadline = Date.now() + secs * 1000;
+    potatoRoundActive = true;
+
     const status = document.getElementById('potato-status');
-    status.textContent = '🥔 Pass it!';
+    status.textContent = '🥔 Passing…';
     status.classList.remove('stopped');
-    document.getElementById('potato-timer').textContent = 'Music on (~' + secs + 's)';
+    status.classList.add('passing');
+
+    const timerEl = document.getElementById('potato-timer');
+    timerEl.textContent = 'Music on — stop is secret';
+    timerEl.classList.remove('flash-stop');
+
+    loadPotatoVideo(song, true);
     musicUnmute();
-    musicPlay();
-    potatoTick = setInterval(updatePotatoClock, 200);
+    // Ensure play after load
+    try {
+      if (ytPlayer && musicReady) {
+        ytPlayer.playVideo();
+        ytPlayer.unMute();
+        musicPlaying = true;
+        updateMiniUI();
+      } else {
+        musicPlay();
+      }
+    } catch (_) {
+      musicPlay();
+    }
+
+    setPotatoProgress(secs, true);
+    updatePotatoStartLabel();
     potatoTimer = setTimeout(stopPotato, secs * 1000);
   }
 
-  function updatePotatoClock() {
-    const left = Math.max(0, Math.ceil((potatoDeadline - Date.now()) / 1000));
-    document.getElementById('potato-timer').textContent = left + 's left (secret-ish)';
-  }
-
   function stopPotato() {
-    clearInterval(potatoTick);
-    potatoTick = null;
-    clearTimeout(potatoTimer);
-    potatoTimer = null;
+    clearPotatoTimers();
+    potatoRoundActive = false;
     const status = document.getElementById('potato-status');
-    status.textContent = '🛑 STOP! Winner / Out!';
+    status.textContent = '🛑 STOP — who’s holding it?';
+    status.classList.remove('passing');
     status.classList.add('stopped', 'pulse');
-    document.getElementById('potato-timer').textContent = 'Music paused — who’s holding it?';
+    const timerEl = document.getElementById('potato-timer');
+    timerEl.textContent = 'Music paused — eliminate, then Next Round';
+    timerEl.classList.add('flash-stop');
+    setPotatoProgress(0, false);
     musicPause();
     tryVibrate([100, 50, 100, 50, 200]);
+    updatePotatoStartLabel();
+  }
+
+  function clearPotatoTimers() {
+    clearTimeout(potatoTimer);
+    clearInterval(potatoTick);
+    potatoTimer = null;
+    potatoTick = null;
   }
 
   function clearPotato() {
-    clearTimeout(potatoTimer);
-    clearInterval(potatoTick);
-    potatoTimer = null;
-    potatoTick = null;
+    clearPotatoTimers();
+    potatoRoundActive = false;
+    setPotatoProgress(0, false);
   }
 
   function resetPotato() {
     clearPotato();
+    potatoSong = null;
     const status = document.getElementById('potato-status');
-    status.textContent = '🥔 Pass it!';
-    status.classList.remove('stopped');
-    document.getElementById('potato-timer').textContent = '—';
+    status.textContent = '🥔 Ready';
+    status.classList.remove('stopped', 'passing', 'pulse');
+    const timerEl = document.getElementById('potato-timer');
+    timerEl.textContent = 'Tap Start Round';
+    timerEl.classList.remove('flash-stop');
+    updatePotatoSongLabel();
+    updatePotatoStartLabel();
+    musicPause();
+  }
+
+  function leavePotatoView() {
+    clearPotato();
+    const wasMode = potatoMode;
+    potatoMode = false;
+    potatoRoundActive = false;
+    potatoSong = null;
+    const status = document.getElementById('potato-status');
+    if (status) {
+      status.textContent = '🥔 Ready';
+      status.classList.remove('stopped', 'passing', 'pulse');
+    }
+    const timerEl = document.getElementById('potato-timer');
+    if (timerEl) {
+      timerEl.textContent = 'Tap Start Round';
+      timerEl.classList.remove('flash-stop');
+    }
+    updatePotatoSongLabel();
+    updatePotatoStartLabel();
+    if (wasMode && potatoSavedMusicIndex != null) {
+      loadTrack(potatoSavedMusicIndex, false);
+    }
+    potatoSavedMusicIndex = null;
+    updateMiniUI();
   }
 
   /* —— Wire events —— */
