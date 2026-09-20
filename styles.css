@@ -943,13 +943,18 @@ textarea {
 .game-legend li:last-child { border-bottom: 0; }
 
 .wipe-answer {
-  margin: 12px 0 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #fff8e1;
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff3e0;
+  border: 2px solid #ff9800;
   color: #e65100;
-  font-weight: 800;
-  font-size: 0.95rem;
+  font-weight: 900;
+  font-size: clamp(1.15rem, 4.5vw, 1.55rem);
+  line-height: 1.35;
+  text-align: center;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 14px rgba(230, 81, 0, 0.18);
 }
 
 /* Cup Stacking */

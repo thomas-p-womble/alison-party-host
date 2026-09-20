@@ -149,28 +149,28 @@
 
   /* Write & Show — tween trivia (11–13). Host sees answer; kids write on boards. */
   const WIPE_TRIVIA = [
-    { q: 'Which Disney movie has the song “Let It Go”?', a: 'Frozen' },
-    { q: 'What color do you get when you mix blue and yellow?', a: 'Green' },
-    { q: 'How many sides does an octagon have?', a: '8' },
-    { q: 'What is the name of Elsa’s sister in Frozen?', a: 'Anna' },
-    { q: 'Which planet is known as the Red Planet?', a: 'Mars' },
-    { q: 'What do bees make?', a: 'Honey' },
-    { q: 'In Harry Potter, what house has a lion as its symbol?', a: 'Gryffindor' },
-    { q: 'What is 7 × 8?', a: '56' },
-    { q: 'Which Taylor Swift album is named after a year?', a: '1989 (also acceptable: 1989 (Taylor’s Version))' },
-    { q: 'What animal is known for laughing (and living in Africa)?', a: 'Hyena' },
-    { q: 'How many continents are there?', a: '7' },
+    { q: 'Who sings "Espresso"?', a: 'Sabrina Carpenter' },
+    { q: 'What color is the brick road in Wicked / The Wizard of Oz?', a: 'Yellow' },
+    { q: "What is Olivia Rodrigo's debut album called?", a: 'Sour' },
+    { q: 'What is the capital of Japan?', a: 'Tokyo' },
+    { q: 'In The Hunger Games, what district is Katniss from?', a: 'District 12' },
+    { q: 'Who sings "Good Luck, Babe!"?', a: 'Chappell Roan' },
+    { q: 'Which Taylor Swift album is named after a year?', a: '1989' },
+    { q: "In Wicked, what is the green-skinned witch's name?", a: 'Elphaba' },
+    { q: 'What soft plush brand makes squishy animal and food toys?', a: 'Squishmallows' },
+    { q: 'Who sings "drivers license"?', a: 'Olivia Rodrigo' },
     { q: 'What is the capital of France?', a: 'Paris' },
-    { q: 'In Moana, what is the name of the demigod who travels with her?', a: 'Maui' },
-    { q: 'What gas do plants “breathe in” that humans breathe out?', a: 'Carbon dioxide (CO₂)' },
-    { q: 'Which sport uses a shuttlecock?', a: 'Badminton' },
+    { q: "In Percy Jackson, which Greek god is Percy's dad?", a: 'Poseidon' },
+    { q: 'Which planet is known as the Red Planet?', a: 'Mars' },
+    { q: 'Who sings "Birds of a Feather"?', a: 'Billie Eilish' },
+    { q: 'In Mean Girls, what do they wear on Wednesdays?', a: 'Pink' },
     { q: 'What is the largest ocean on Earth?', a: 'Pacific Ocean' },
-    { q: 'In Encanto, who can hear the cracks in the house / has super hearing?', a: 'Dolores' },
-    { q: 'How many minutes are in two hours?', a: '120' },
-    { q: 'What do you call a baby cat?', a: 'Kitten' },
-    { q: 'Which pop star sings “Shake It Off”?', a: 'Taylor Swift' },
-    { q: 'What is H2O better known as?', a: 'Water' },
-    { q: 'In The Hunger Games, what district is Katniss from?', a: 'District 12' }
+    { q: 'In Harry Potter, which house has a lion as its symbol?', a: 'Gryffindor' },
+    { q: 'What game platform has Adopt Me and Brookhaven?', a: 'Roblox' },
+    { q: 'Who plays Glinda in the Wicked movie?', a: 'Ariana Grande' },
+    { q: 'What gas do plants take in that humans breathe out?', a: 'Carbon dioxide (CO2)' },
+    { q: 'In Encanto, who has super hearing?', a: 'Dolores' },
+    { q: 'What country is home to the Great Wall?', a: 'China' }
   ];
 
   const DEFAULT_STATE = {
@@ -1218,7 +1218,7 @@
     if (prog) prog.textContent = 'Question ' + (state.wipeIndex + 1) + ' of ' + WIPE_TRIVIA.length;
     if (qEl) qEl.textContent = item.q;
     if (aEl) {
-      aEl.textContent = 'Host answer: ' + item.a;
+      aEl.textContent = 'Answer: ' + item.a;
       aEl.classList.add('hidden');
     }
     const prev = document.getElementById('wipe-prev');
@@ -1239,6 +1239,14 @@
       void el.offsetWidth;
       el.classList.add('pulse');
       tryVibrate(i === 3 ? [40, 40, 80] : 40);
+      if (i === 3) {
+        const item = WIPE_TRIVIA[state.wipeIndex];
+        const aEl = document.getElementById('wipe-answer');
+        if (aEl && item) {
+          aEl.textContent = 'Answer: ' + item.a;
+          aEl.classList.remove('hidden');
+        }
+      }
       i += 1;
       if (i < steps.length) wipeTimer = setTimeout(tick, 900);
     }
