@@ -174,6 +174,7 @@
   let lyricCutMediaAt = 0;
   let musicPlaying = false;
   let pendingPlay = false;
+  let freezePlayGuardUntil = 0;
   let lastYtStartSeconds = 0;
   /** @type {HTMLAudioElement|null} */
   let htmlAudio = null;
@@ -266,11 +267,15 @@
     }
     try {
       pendingPlay = true;
+      freezePlayGuardUntil = Date.now() + 2500; /* anti iOS hidden-pause */
       ytPlayer.loadVideoById({ videoId: videoId, startSeconds: startAt });
-      /* User-gesture play + delayed nudges for iOS race after loadVideoById */
       playYtNudge();
-      setTimeout(playYtNudge, 100);
-      setTimeout(playYtNudge, 400);
+      setTimeout(() => {
+        try {
+          const st = ytPlayer.getPlayerState();
+          if (st !== 1) playYtNudge();
+        } catch (_) { playYtNudge(); }
+      }, 300);
       return true;
     } catch (e) {
       toast('Could not load track');
@@ -701,19 +706,21 @@
   }
 
   function onPlayerStateChange(ev) {
-    /* During freeze/potato, don't treat Music Game local files as blocking YT events */
     if (usingLocal && !freezeMode && !potatoMode) return;
     if (!freezeMode && !potatoMode && hasLocal(currentSong())) return;
     const s = ev.data;
     musicPlaying = s === 1 || s === 3;
-    /* iOS: loadVideoById sometimes needs an explicit play once CUED/BUFFERING */
     if (pendingPlay && (s === 5 || s === 3 || s === 1)) {
-      pendingPlay = false;
+      if (s === 1) pendingPlay = false;
       try {
         ytPlayer.playVideo();
         if (!musicMuted) ytPlayer.unMute();
       } catch (_) {}
       musicPlaying = true;
+    }
+    /* iOS often auto-pauses "barely visible" players — re-play once during guard window */
+    if (s === 2 && (freezeMode || potatoMode) && Date.now() < freezePlayGuardUntil) {
+      try { ytPlayer.playVideo(); musicPlaying = true; } catch (_) {}
     }
     updateMiniUI();
     if (s === 0) {
