@@ -471,22 +471,24 @@ body {
   box-shadow: var(--shadow);
 }
 .yt-frame {
-  /* MUST stay in-viewport on iOS — fully hidden/off-screen YT gets paused after ~0.5s */
+  /* In-viewport audio surface — iOS/Chrome pause fully hidden players after ~0.5s */
   position: fixed;
-  left: 8px;
-  bottom: calc(72px + env(safe-area-inset-bottom, 0px));
-  width: 120px;
-  height: 68px;
-  opacity: 0.03;
-  z-index: 80;
+  right: 8px;
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  width: 160px;
+  height: 90px;
+  opacity: 0.2;
+  z-index: 85;
   pointer-events: none;
   overflow: hidden;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+  background: #000;
 }
 .yt-frame iframe {
-  width: 120px !important;
-  height: 68px !important;
+  width: 160px !important;
+  height: 90px !important;
   border: 0;
   pointer-events: none;
 }
@@ -1676,8 +1678,11 @@ textarea {
         lastYtStartSeconds = startAt;
         ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: startAt });
         pendingPlay = true;
-        setTimeout(playYtNudge, 100);
-        setTimeout(playYtNudge, 400);
+        setTimeout(() => {
+          try {
+            if (ytPlayer.getPlayerState() !== 1) playYtNudge();
+          } catch (_) { playYtNudge(); }
+        }, 300);
       }
       ytPlayer.playVideo();
       if (musicMuted) ytPlayer.mute();
@@ -1690,6 +1695,7 @@ textarea {
   }
 
   function musicPause() {
+    freezePlayGuardUntil = 0; /* intentional pause — don't anti-iOS re-play */
     pauseHtmlAudio();
     pauseYouTube();
     musicPlaying = false;
@@ -1904,8 +1910,8 @@ textarea {
 
     window.onYouTubeIframeAPIReady = function () {
       ytPlayer = new YT.Player('yt-player', {
-        width: '1',
-        height: '1',
+        width: '160',
+        height: '90',
         videoId: currentSong().youtubeId,
         playerVars: {
           playsinline: 1,

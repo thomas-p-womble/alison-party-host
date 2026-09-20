@@ -455,22 +455,24 @@ body {
   box-shadow: var(--shadow);
 }
 .yt-frame {
-  /* MUST stay in-viewport on iOS — fully hidden/off-screen YT gets paused after ~0.5s */
+  /* In-viewport audio surface — iOS/Chrome pause fully hidden players after ~0.5s */
   position: fixed;
-  left: 8px;
-  bottom: calc(72px + env(safe-area-inset-bottom, 0px));
-  width: 120px;
-  height: 68px;
-  opacity: 0.03;
-  z-index: 80;
+  right: 8px;
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  width: 160px;
+  height: 90px;
+  opacity: 0.2;
+  z-index: 85;
   pointer-events: none;
   overflow: hidden;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+  background: #000;
 }
 .yt-frame iframe {
-  width: 120px !important;
-  height: 68px !important;
+  width: 160px !important;
+  height: 90px !important;
   border: 0;
   pointer-events: none;
 }

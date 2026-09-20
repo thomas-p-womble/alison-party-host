@@ -530,8 +530,11 @@
         lastYtStartSeconds = startAt;
         ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: startAt });
         pendingPlay = true;
-        setTimeout(playYtNudge, 100);
-        setTimeout(playYtNudge, 400);
+        setTimeout(() => {
+          try {
+            if (ytPlayer.getPlayerState() !== 1) playYtNudge();
+          } catch (_) { playYtNudge(); }
+        }, 300);
       }
       ytPlayer.playVideo();
       if (musicMuted) ytPlayer.mute();
@@ -544,6 +547,7 @@
   }
 
   function musicPause() {
+    freezePlayGuardUntil = 0; /* intentional pause — don't anti-iOS re-play */
     pauseHtmlAudio();
     pauseYouTube();
     musicPlaying = false;
@@ -758,8 +762,8 @@
 
     window.onYouTubeIframeAPIReady = function () {
       ytPlayer = new YT.Player('yt-player', {
-        width: '1',
-        height: '1',
+        width: '160',
+        height: '90',
         videoId: currentSong().youtubeId,
         playerVars: {
           playsinline: 1,
