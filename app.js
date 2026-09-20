@@ -170,6 +170,8 @@
   let ytPlayer = null;
   let musicReady = false;
   let musicMuted = false;
+  let lyricCutWallStart = 0;
+  let lyricCutMediaAt = 0;
   let musicPlaying = false;
   let pendingPlay = false;
   /** @type {HTMLAudioElement|null} */
@@ -548,27 +550,32 @@
     const status = document.getElementById('lyric-mute-status');
     if (btn) {
       if (musicMuted) {
-        btn.textContent = '▶ BACK';
+        btn.textContent = '🔊 UNMUTE';
         btn.classList.remove('is-unmuted');
         btn.classList.add('is-muted');
         btn.setAttribute('aria-pressed', 'true');
       } else {
-        btn.textContent = '⏸ CUT';
+        btn.textContent = '🔇 MUTE';
         btn.classList.remove('is-muted');
         btn.classList.add('is-unmuted');
         btn.setAttribute('aria-pressed', 'false');
       }
     }
     if (status) {
-      status.textContent = musicMuted ? 'Cut — kids sing' : 'Playing';
+      status.textContent = musicMuted ? 'Muted — kids sing (track advancing)' : 'Playing';
       status.classList.toggle('is-muted', musicMuted);
     }
   }
 
-  /* Sing-along cut: YouTube mute() is laggy on iOS — pause/play is instant. */
+  /*
+   * Sing-along MUTE: YouTube mute() is laggy on iPhone, but pause alone freezes the song.
+   * Instant silence via pause; on UNMUTE seek forward by wall-clock mute duration so the
+   * catchy chorus has already passed — same end result as a real mute.
+   */
   function lyricToggleMute() {
     if (musicMuted) {
-      /* BACK — resume immediately */
+      const elapsed = Math.max(0, (Date.now() - lyricCutWallStart) / 1000);
+      const target = lyricCutMediaAt + elapsed;
       musicMuted = false;
       if (htmlAudio) {
         htmlAudio.muted = false;
@@ -577,9 +584,11 @@
       if (ytPlayer && musicReady) {
         try { if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(100); } catch (_) {}
         try { ytPlayer.unMute(); } catch (_) {}
+        try { ytPlayer.seekTo(target, true); } catch (_) {}
         try { ytPlayer.playVideo(); } catch (_) {}
       }
       if (htmlAudio && usingLocal) {
+        try { htmlAudio.currentTime = target; } catch (_) {}
         try { htmlAudio.play(); } catch (_) {}
       }
       musicPlaying = true;
@@ -588,7 +597,8 @@
       setCueHighlight('done');
       tryVibrate(20);
     } else {
-      /* CUT — pause first (snappy), then mute/volume 0 as backup */
+      lyricCutWallStart = Date.now();
+      lyricCutMediaAt = getMusicTime();
       musicMuted = true;
       if (ytPlayer && musicReady) {
         try { ytPlayer.pauseVideo(); } catch (_) {}
