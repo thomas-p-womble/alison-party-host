@@ -35,14 +35,18 @@
 
       <div class="card premium-card" id="premium-card">
         <h2>YouTube Premium (no ads)</h2>
-        <p class="hint" style="margin:0 0 10px">Ads appear when this runs as a Home Screen app — that mode <strong>can’t see your YouTube login</strong>. Use Safari with Premium signed in.</p>
-        <ol class="hint" style="margin:0 0 12px;padding-left:1.2rem">
-          <li>Open this page in <strong>Safari</strong> (not the Home Screen icon)</li>
-          <li>Tap <strong>Sign in to YouTube</strong> and sign in with your Premium account</li>
-          <li>Come back here and play — embeds use that Safari login</li>
+        <p class="hint" style="margin:0 0 10px">iPhone opens the <strong>YouTube app</strong> by default — that login does <em>not</em> reach this party page. You must sign into YouTube <strong>inside Safari</strong>.</p>
+        <p class="hint" style="margin:0 0 8px;font-weight:800;color:var(--ink)">Do this once (exact Settings):</p>
+        <ol class="hint premium-steps" style="margin:0 0 12px;padding-left:1.2rem">
+          <li><strong>Settings → YouTube → Open Links → Off</strong> (stops jumping to the app)</li>
+          <li><strong>Settings → Safari → Prevent Cross-Site Tracking → Off</strong> (lets Premium reach the player — turn back on after the party)</li>
+          <li>Delete any Home Screen “Alison Party” icon</li>
+          <li>Open <strong>Safari</strong> and go to youtube.com — stay in Safari, sign in with Premium if needed</li>
+          <li>In the same Safari, open the party link again and play</li>
         </ol>
-        <button type="button" id="btn-yt-signin" class="btn primary">Sign in to YouTube Premium</button>
-        <button type="button" id="btn-open-safari" class="btn secondary" style="margin-top:8px">Open this page in Safari</button>
+        <button type="button" id="btn-copy-party-url" class="btn primary">Copy party link (paste in Safari)</button>
+        <button type="button" id="btn-open-google-account" class="btn secondary" style="margin-top:8px">Open Google Account in Safari</button>
+        <p class="hint" style="margin:8px 0 0">“Open Google Account” uses accounts.google.com so iPhone is less likely to steal you into the YouTube app. After you’re signed in, open the party link in Safari.</p>
         <p id="premium-status" class="hint" style="margin:10px 0 0"></p>
       </div>
 

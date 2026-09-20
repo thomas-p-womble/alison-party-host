@@ -762,44 +762,42 @@
       window.navigator.standalone === true;
   }
 
+  function partyUrl() {
+    return location.href.split('#')[0];
+  }
+
   function updatePremiumStatus() {
     const el = document.getElementById('premium-status');
     if (!el) return;
     if (isStandaloneApp()) {
-      el.innerHTML = '⚠️ Running as Home Screen app — YouTube login/Premium usually <strong>won’t apply</strong>. Open in Safari (button above).';
+      el.innerHTML = '⚠️ Still in the Home Screen app. Copy the link → open <strong>Safari</strong> → paste.';
     } else {
-      el.textContent = 'Running in browser — after you sign in to YouTube in this Safari, Premium should remove ads on play.';
+      el.textContent = 'You are in a browser tab. After YouTube is signed in inside Safari (not the YouTube app), play a song to test ads.';
     }
   }
 
-  function signInYouTubePremium() {
-    /* Same browser cookie jar as embeds when not standalone */
-    const url = 'https://accounts.google.com/ServiceLogin?service=youtube&continue=' +
-      encodeURIComponent('https://www.youtube.com/');
-    window.open(url, '_blank', 'noopener');
-    toast('Sign in with Premium, then return here and play');
+  function copyPartyUrl() {
+    const url = partyUrl();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        toast('Copied. Open Safari → paste in address bar');
+      }).catch(() => prompt('Copy this link into Safari:', url));
+    } else {
+      prompt('Copy this link into Safari:', url);
+    }
     updatePremiumStatus();
   }
 
-  function openInSafariHint() {
-    const url = location.href.split('#')[0];
-    if (navigator.share) {
-      navigator.share({ title: 'Alison Party Host', url: url }).catch(() => {
-        copyPartyUrl(url);
-      });
-    } else {
-      copyPartyUrl(url);
-    }
-  }
-
-  function copyPartyUrl(url) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(() => {
-        toast('Link copied — paste in Safari to use Premium');
-      }).catch(() => toast(url));
-    } else {
-      toast('Open in Safari: ' + url);
-    }
+  function openGoogleAccountInSafari() {
+    /* accounts.google.com is less likely to universal-link into YouTube app */
+    const a = document.createElement('a');
+    a.href = 'https://accounts.google.com/';
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast('Sign in there, then paste the party link in Safari');
     updatePremiumStatus();
   }
 
@@ -1364,8 +1362,8 @@
   }
 
   function bind() {
-    safeOn('btn-yt-signin', 'click', signInYouTubePremium);
-    safeOn('btn-open-safari', 'click', openInSafariHint);
+    safeOn('btn-copy-party-url', 'click', copyPartyUrl);
+    safeOn('btn-open-google-account', 'click', openGoogleAccountInSafari);
     updatePremiumStatus();
 
     document.querySelectorAll('[data-view]').forEach((el) => {
