@@ -1162,7 +1162,7 @@
     clearPotatoTimers();
     enterPotatoMode();
     const song = nextPotatoSong();
-    const secs = 15 + Math.floor(Math.random() * 21); // 15–35
+    const secs = 15 + Math.floor(Math.random() * 6); // 15–20
     const startAt = energeticStartSeconds(song);
     potatoDeadline = Date.now() + secs * 1000;
     potatoRoundActive = true;
