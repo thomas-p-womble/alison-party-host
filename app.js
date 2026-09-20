@@ -212,6 +212,7 @@
 
   function toast(msg) {
     const el = document.getElementById('toast');
+    if (!el) return;
     el.textContent = msg;
     el.classList.remove('hidden');
     clearTimeout(toast._t);
@@ -515,10 +516,11 @@
     if (htmlAudio) htmlAudio.muted = true;
     if (ytPlayer && musicReady) {
       try { ytPlayer.mute(); } catch (_) {}
-      /* Keep playback going — mute must not pause */
-      try { ytPlayer.playVideo(); } catch (_) {}
+      /* Only nudge play if already playing — never fake musicPlaying=true */
+      if (musicPlaying) {
+        try { ytPlayer.playVideo(); } catch (_) {}
+      }
     }
-    musicPlaying = true;
     updateMiniUI();
   }
 
@@ -527,7 +529,9 @@
     if (htmlAudio) htmlAudio.muted = false;
     if (ytPlayer && musicReady) {
       try { ytPlayer.unMute(); } catch (_) {}
-      try { ytPlayer.playVideo(); } catch (_) {}
+      if (musicPlaying) {
+        try { ytPlayer.playVideo(); } catch (_) {}
+      }
     }
     updateMiniUI();
   }
@@ -745,6 +749,7 @@
   /* —— Home playlist —— */
   function renderPlaylist() {
     const ol = document.getElementById('playlist');
+    if (!ol) return;
     ol.innerHTML = PLAYLIST.map((s, i) =>
       '<li data-index="' + i + '" class="' + (i === state.musicIndex ? 'playing' : '') + '">' +
       '<button type="button" class="playlist-play" data-index="' + i + '" aria-label="Play ' + escapeHtml(s.title) + '">▶</button>' +
@@ -1267,12 +1272,21 @@
   }
 
   /* —— Wire events —— */
+  function safeOn(id, event, handler) {
+    const el = document.getElementById(id);
+    if (!el) {
+      console.warn('[party] missing #' + id);
+      return;
+    }
+    el.addEventListener(event, handler);
+  }
+
   function bind() {
     document.querySelectorAll('[data-view]').forEach((el) => {
       el.addEventListener('click', () => showView(el.getAttribute('data-view')));
     });
 
-    document.getElementById('btn-reset-scores').addEventListener('click', () => {
+    safeOn('btn-reset-scores', 'click', () => {
       if (!confirm('Reset all scores and counts?')) return;
       const keepMusic = state.musicIndex;
       state = structuredClone(DEFAULT_STATE);
@@ -1285,17 +1299,17 @@
     });
 
     /* Mini player */
-    document.getElementById('mini-play').addEventListener('click', musicTogglePlay);
-    document.getElementById('mini-mute').addEventListener('click', (e) => {
+    safeOn('mini-play', 'click', musicTogglePlay);
+    safeOn('mini-mute', 'click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       musicToggleMute();
     });
-    document.getElementById('mini-prev').addEventListener('click', () => {
+    safeOn('mini-prev', 'click', () => {
       loadTrack(state.musicIndex - 1, true);
       musicPlay();
     });
-    document.getElementById('mini-next').addEventListener('click', () => {
+    safeOn('mini-next', 'click', () => {
       loadTrack(state.musicIndex + 1, true);
       musicPlay();
     });
@@ -1330,7 +1344,7 @@
       btn.addEventListener('click', () => setBuzz(btn.getAttribute('data-team')));
     });
 
-    document.getElementById('ntt-clear-buzz').addEventListener('click', () => {
+    safeOn('ntt-clear-buzz', 'click', () => {
       nttBuzzed = null;
       document.getElementById('ntt-buzzed').classList.add('hidden');
       document.querySelectorAll('#ntt-teams .team-row').forEach((r) => r.classList.remove('winner'));
@@ -1344,7 +1358,7 @@
       document.querySelectorAll('.team-buzz').forEach((b) => { b.disabled = false; });
     }
 
-    document.getElementById('ntt-next').addEventListener('click', () => {
+    safeOn('ntt-next', 'click', () => {
       state.nttIndex = (state.nttIndex + 1) % PLAYLIST.length;
       clearBuzzUI();
       saveState();
@@ -1352,7 +1366,7 @@
       loadTrack(state.nttIndex, true);
       musicPlay();
     });
-    document.getElementById('ntt-prev').addEventListener('click', () => {
+    safeOn('ntt-prev', 'click', () => {
       state.nttIndex = (state.nttIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
       clearBuzzUI();
       saveState();
@@ -1360,29 +1374,29 @@
       loadTrack(state.nttIndex, true);
       musicPlay();
     });
-    document.getElementById('ntt-play').addEventListener('click', () => {
+    safeOn('ntt-play', 'click', () => {
       loadTrack(state.nttIndex, true);
       musicUnmute();
       musicPlay();
     });
-    document.getElementById('ntt-pause').addEventListener('click', () => {
+    safeOn('ntt-pause', 'click', () => {
       musicPause();
     });
 
     /* Wipe */
-    document.getElementById('wipe-go').addEventListener('click', runWipe);
-    document.getElementById('wipe-reset').addEventListener('click', () => {
+    safeOn('wipe-go', 'click', runWipe);
+    safeOn('wipe-reset', 'click', () => {
       clearTimeout(wipeTimer);
       document.getElementById('wipe-display').textContent = 'Ready';
     });
 
     /* Lyrics — instant mute on pointerdown (not click/release) */
-    document.getElementById('lyric-mute-toggle').addEventListener('click', (e) => {
+    safeOn('lyric-mute-toggle', 'click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       lyricToggleMute();
     });
-    document.getElementById('lyric-next').addEventListener('click', () => {
+    safeOn('lyric-next', 'click', () => {
       state.lyricIndex = (state.lyricIndex + 1) % PLAYLIST.length;
       saveState();
       renderLyrics();
@@ -1391,7 +1405,7 @@
       musicPlay();
       setCueHighlight('playing');
     });
-    document.getElementById('lyric-prev').addEventListener('click', () => {
+    safeOn('lyric-prev', 'click', () => {
       state.lyricIndex = (state.lyricIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
       saveState();
       renderLyrics();
@@ -1400,7 +1414,7 @@
       musicPlay();
       setCueHighlight('playing');
     });
-    document.getElementById('lyric-play').addEventListener('click', () => {
+    safeOn('lyric-play', 'click', () => {
       musicUnmute();
       loadTrack(state.lyricIndex, true);
       /* Force start at 0 even if same track already loaded */
@@ -1413,45 +1427,45 @@
     });
 
     /* Freeze */
-    document.getElementById('freeze-play').addEventListener('click', () => setFreezeMode('dance'));
-    document.getElementById('freeze-pause').addEventListener('click', () => setFreezeMode('freeze'));
-    document.getElementById('freeze-plus').addEventListener('click', () => {
+    safeOn('freeze-play', 'click', () => setFreezeMode('dance'));
+    safeOn('freeze-pause', 'click', () => setFreezeMode('freeze'));
+    safeOn('freeze-plus', 'click', () => {
       state.freezeCount += 1;
       saveState();
       renderFreeze();
     });
-    document.getElementById('freeze-minus').addEventListener('click', () => {
+    safeOn('freeze-minus', 'click', () => {
       state.freezeCount = Math.max(0, state.freezeCount - 1);
       saveState();
       renderFreeze();
     });
-    document.getElementById('freeze-elim').addEventListener('click', () => {
+    safeOn('freeze-elim', 'click', () => {
       state.freezeCount = Math.max(0, state.freezeCount - 1);
       saveState();
       renderFreeze();
       toast('Eliminated! Still in: ' + state.freezeCount);
       tryVibrate(40);
     });
-    document.getElementById('freeze-reset-count').addEventListener('click', () => {
+    safeOn('freeze-reset-count', 'click', () => {
       state.freezeCount = 12;
       saveState();
       renderFreeze();
     });
 
     /* Potato */
-    document.getElementById('potato-start').addEventListener('click', startPotato);
-    document.getElementById('potato-stop').addEventListener('click', stopPotato);
-    document.getElementById('potato-reset').addEventListener('click', resetPotato);
+    safeOn('potato-start', 'click', startPotato);
+    safeOn('potato-stop', 'click', stopPotato);
+    safeOn('potato-reset', 'click', resetPotato);
 
     /* Quizmaster */
-    document.getElementById('qm-next').addEventListener('click', () => {
+    safeOn('qm-next', 'click', () => {
       const roster = state.qmRoster.length ? state.qmRoster : DEFAULT_STATE.qmRoster;
       state.qmIndex = (state.qmIndex + 1) % roster.length;
       saveState();
       renderQM();
       tryVibrate(30);
     });
-    document.getElementById('qm-save').addEventListener('click', () => {
+    safeOn('qm-save', 'click', () => {
       const lines = document.getElementById('qm-roster').value
         .split('\n')
         .map((l) => l.trim())
@@ -1468,7 +1482,7 @@
     });
 
     /* Alison Quiz */
-    document.getElementById('trivia-prev').addEventListener('click', () => {
+    safeOn('trivia-prev', 'click', () => {
       if (state.triviaIndex > 0) {
         state.triviaIndex -= 1;
         saveState();
@@ -1476,7 +1490,7 @@
         tryVibrate(20);
       }
     });
-    document.getElementById('trivia-next').addEventListener('click', () => {
+    safeOn('trivia-next', 'click', () => {
       if (state.triviaIndex < QUIZ_QUESTIONS.length - 1) {
         state.triviaIndex += 1;
         saveState();
@@ -1484,7 +1498,7 @@
         tryVibrate(20);
       }
     });
-    document.getElementById('trivia-reset').addEventListener('click', () => {
+    safeOn('trivia-reset', 'click', () => {
       state.triviaScores = { A: 0, B: 0, C: 0 };
       state.triviaIndex = 0;
       saveState();
@@ -1502,7 +1516,7 @@
         renderTimer();
       });
     });
-    document.getElementById('timer-start').addEventListener('click', () => {
+    safeOn('timer-start', 'click', () => {
       if (timerRunning) return;
       if (timerLeft <= 0) timerLeft = timerSec;
       document.getElementById('timer-done').classList.add('hidden');
@@ -1520,10 +1534,10 @@
         }
       }, 1000);
     });
-    document.getElementById('timer-pause').addEventListener('click', () => {
+    safeOn('timer-pause', 'click', () => {
       stopTimerInterval();
     });
-    document.getElementById('timer-reset').addEventListener('click', () => {
+    safeOn('timer-reset', 'click', () => {
       stopTimerInterval();
       timerLeft = timerSec;
       document.getElementById('timer-done').classList.add('hidden');
