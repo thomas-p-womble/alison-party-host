@@ -174,6 +174,7 @@
   let lyricCutMediaAt = 0;
   let musicPlaying = false;
   let pendingPlay = false;
+  let lastYtStartSeconds = 0;
   /** @type {HTMLAudioElement|null} */
   let htmlAudio = null;
   /** song.id -> { url, name, source: 'file'|'folder' } */
@@ -257,6 +258,7 @@
 
   function loadAndPlayYt(videoId, startSeconds) {
     const startAt = Math.max(0, Number(startSeconds) || 0);
+    lastYtStartSeconds = startAt;
     if (!musicReady || !ytPlayer) {
       pendingPlay = true;
       toast('Loading audio… tap again in a sec');
@@ -267,8 +269,8 @@
       ytPlayer.loadVideoById({ videoId: videoId, startSeconds: startAt });
       /* User-gesture play + delayed nudges for iOS race after loadVideoById */
       playYtNudge();
-      setTimeout(playYtNudge, 150);
-      setTimeout(playYtNudge, 450);
+      setTimeout(playYtNudge, 100);
+      setTimeout(playYtNudge, 400);
       return true;
     } catch (e) {
       toast('Could not load track');
@@ -491,7 +493,7 @@
 
   function musicPlay() {
     const song = activePlaybackSong();
-    if (!potatoMode && hasLocal(song)) {
+    if (!potatoMode && !freezeMode && hasLocal(song)) {
       usingLocal = true;
       pauseYouTube();
       const a = ensureHtmlAudio();
@@ -516,8 +518,15 @@
     try {
       const st = ytPlayer.getPlayerState();
       if (st === 0 || st === 5 || st === -1 || st === undefined) {
-        const startAt = (freezeMode || potatoMode) ? energeticStartSeconds(song) : 0;
+        let startAt = 0;
+        if (freezeMode || potatoMode) {
+          startAt = lastYtStartSeconds > 0 ? lastYtStartSeconds : energeticStartSeconds(song);
+        }
+        lastYtStartSeconds = startAt;
         ytPlayer.loadVideoById({ videoId: song.youtubeId, startSeconds: startAt });
+        pendingPlay = true;
+        setTimeout(playYtNudge, 100);
+        setTimeout(playYtNudge, 400);
       }
       ytPlayer.playVideo();
       if (musicMuted) ytPlayer.mute();
@@ -1188,13 +1197,17 @@
     potatoRoundActive = true;
 
     const status = document.getElementById('potato-status');
-    status.textContent = '🥔 Passing…';
-    status.classList.remove('stopped');
-    status.classList.add('passing');
+    if (status) {
+      status.textContent = '🥔 Passing…';
+      status.classList.remove('stopped');
+      status.classList.add('passing');
+    }
 
     const timerEl = document.getElementById('potato-timer');
-    timerEl.textContent = 'Music on — stop is secret';
-    timerEl.classList.remove('flash-stop');
+    if (timerEl) {
+      timerEl.textContent = 'Music on — stop is secret';
+      timerEl.classList.remove('flash-stop');
+    }
 
     musicUnmute();
     loadPotatoVideo(song, true, startAt);
@@ -1208,12 +1221,16 @@
     clearPotatoTimers();
     potatoRoundActive = false;
     const status = document.getElementById('potato-status');
-    status.textContent = '🛑 STOP — who’s holding it?';
-    status.classList.remove('passing');
-    status.classList.add('stopped', 'pulse');
+    if (status) {
+      status.textContent = '🛑 STOP — who’s holding it?';
+      status.classList.remove('passing');
+      status.classList.add('stopped', 'pulse');
+    }
     const timerEl = document.getElementById('potato-timer');
-    timerEl.textContent = 'Music paused — eliminate, then Next Round';
-    timerEl.classList.add('flash-stop');
+    if (timerEl) {
+      timerEl.textContent = 'Music paused — eliminate, then Next Round';
+      timerEl.classList.add('flash-stop');
+    }
     setPotatoProgress(0, false);
     musicPause();
     tryVibrate([100, 50, 100, 50, 200]);
@@ -1392,9 +1409,7 @@
     });
 
     /* Lyrics — instant mute on pointerdown (not click/release) */
-    safeOn('lyric-mute-toggle', 'click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    bindInstantPress(document.getElementById('lyric-mute-toggle'), () => {
       lyricToggleMute();
     });
     safeOn('lyric-next', 'click', () => {
