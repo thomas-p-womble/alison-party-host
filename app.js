@@ -510,16 +510,25 @@
 
   function musicMute() {
     musicMuted = true;
-    if (htmlAudio) htmlAudio.muted = true;
+    if (htmlAudio) {
+      htmlAudio.muted = true;
+      htmlAudio.volume = 0;
+    }
     if (ytPlayer && musicReady) {
       try { ytPlayer.mute(); } catch (_) {}
+      try {
+        if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(0);
+      } catch (_) {}
     }
     updateMiniUI();
   }
 
   function musicUnmute() {
     musicMuted = false;
-    if (htmlAudio) htmlAudio.muted = false;
+    if (htmlAudio) {
+      htmlAudio.muted = false;
+      htmlAudio.volume = 1;
+    }
     if (ytPlayer && musicReady) {
       try { ytPlayer.unMute(); } catch (_) {}
       try {
@@ -559,14 +568,48 @@
   function lyricToggleMute() {
     if (musicMuted) {
       musicUnmute();
+      updateLyricMuteUI();
       setCueHighlight('done');
-      toast('Unmuted — music back!');
+      tryVibrate(30);
     } else {
       musicMute();
+      updateLyricMuteUI();
       setCueHighlight('muted');
-      toast('MUTED — kids finish the line!');
-      tryVibrate(50);
+      tryVibrate(40);
     }
+  }
+
+  /** Instant press (pointerdown) — mute on DOWN, swallow follow-up click. */
+  function bindInstantPress(el, handler) {
+    if (!el) return;
+    let suppressClick = false;
+    const fire = (e) => {
+      if (e.type === 'pointerdown' && e.button != null && e.button !== 0) return;
+      e.preventDefault();
+      if (typeof e.pointerId === 'number') {
+        try { el.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+      suppressClick = true;
+      handler(e);
+    };
+    el.addEventListener('pointerdown', fire);
+    // touchstart fallback when Pointer Events unavailable
+    el.addEventListener('touchstart', (e) => {
+      if (window.PointerEvent) return;
+      e.preventDefault();
+      suppressClick = true;
+      handler(e);
+    }, { passive: false });
+    el.addEventListener('click', (e) => {
+      if (suppressClick) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        suppressClick = false;
+        return;
+      }
+      // keyboard / accessibility activation
+      handler(e);
+    });
   }
 
   function setCueHighlight(phase) {
@@ -1242,7 +1285,9 @@
 
     /* Mini player */
     document.getElementById('mini-play').addEventListener('click', musicTogglePlay);
-    document.getElementById('mini-mute').addEventListener('click', musicToggleMute);
+    bindInstantPress(document.getElementById('mini-mute'), () => {
+      musicToggleMute();
+    });
     document.getElementById('mini-prev').addEventListener('click', () => {
       loadTrack(state.musicIndex - 1, true);
       musicPlay();
@@ -1328,8 +1373,8 @@
       document.getElementById('wipe-display').textContent = 'Ready';
     });
 
-    /* Lyrics — one-button mute toggle */
-    document.getElementById('lyric-mute-toggle').addEventListener('click', () => {
+    /* Lyrics — instant mute on pointerdown (not click/release) */
+    bindInstantPress(document.getElementById('lyric-mute-toggle'), () => {
       lyricToggleMute();
     });
     document.getElementById('lyric-next').addEventListener('click', () => {

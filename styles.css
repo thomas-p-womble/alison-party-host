@@ -508,6 +508,10 @@ body {
   cursor: pointer;
   font-family: inherit;
   box-shadow: 0 2px 8px rgba(155, 126, 200, 0.25);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .mini-btn.play {
   width: 60px;
@@ -556,10 +560,16 @@ body {
 .cue-step.kids .step-num { background: #e65100; color: #fff; }
 
 .mega.mute-toggle {
+  display: block;
+  width: 100%;
   min-height: 96px;
   font-size: 1.75rem;
   letter-spacing: 0.04em;
   transition: background 0.15s ease, box-shadow 0.15s ease;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .mega.mute-toggle.is-unmuted {
   background: linear-gradient(135deg, #e65100, #d32f2f);
