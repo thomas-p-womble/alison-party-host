@@ -279,7 +279,7 @@
       }, 300);
       if (!warnedYtAds && Object.keys(localTracks).length === 0) {
         warnedYtAds = true;
-        toast('YouTube may show ads — Load my song files for ad-free');
+        toast('If you see ads: Sign in to YouTube Premium in Safari (Home)');
       }
       return true;
     } catch (e) {
@@ -756,6 +756,53 @@
     }, 400);
   }
 
+
+  function isStandaloneApp() {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
+  }
+
+  function updatePremiumStatus() {
+    const el = document.getElementById('premium-status');
+    if (!el) return;
+    if (isStandaloneApp()) {
+      el.innerHTML = '⚠️ Running as Home Screen app — YouTube login/Premium usually <strong>won’t apply</strong>. Open in Safari (button above).';
+    } else {
+      el.textContent = 'Running in browser — after you sign in to YouTube in this Safari, Premium should remove ads on play.';
+    }
+  }
+
+  function signInYouTubePremium() {
+    /* Same browser cookie jar as embeds when not standalone */
+    const url = 'https://accounts.google.com/ServiceLogin?service=youtube&continue=' +
+      encodeURIComponent('https://www.youtube.com/');
+    window.open(url, '_blank', 'noopener');
+    toast('Sign in with Premium, then return here and play');
+    updatePremiumStatus();
+  }
+
+  function openInSafariHint() {
+    const url = location.href.split('#')[0];
+    if (navigator.share) {
+      navigator.share({ title: 'Alison Party Host', url: url }).catch(() => {
+        copyPartyUrl(url);
+      });
+    } else {
+      copyPartyUrl(url);
+    }
+  }
+
+  function copyPartyUrl(url) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        toast('Link copied — paste in Safari to use Premium');
+      }).catch(() => toast(url));
+    } else {
+      toast('Open in Safari: ' + url);
+    }
+    updatePremiumStatus();
+  }
+
   function initYouTube() {
     if (location.protocol === 'file:') {
       const note = document.getElementById('yt-note');
@@ -770,6 +817,7 @@
         width: '160',
         height: '90',
         videoId: currentSong().youtubeId,
+        host: 'https://www.youtube.com',
         playerVars: {
           playsinline: 1,
           controls: 0,
@@ -1316,6 +1364,10 @@
   }
 
   function bind() {
+    safeOn('btn-yt-signin', 'click', signInYouTubePremium);
+    safeOn('btn-open-safari', 'click', openInSafariHint);
+    updatePremiumStatus();
+
     document.querySelectorAll('[data-view]').forEach((el) => {
       el.addEventListener('click', () => showView(el.getAttribute('data-view')));
     });

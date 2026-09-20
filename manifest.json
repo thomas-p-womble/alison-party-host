@@ -1,10 +1,10 @@
 {
   "name": "Alison Party Host",
   "short_name": "Alison Party",
-  "description": "Birthday party game host for Alison — Name That Tune, Freeze Dance, and more",
+  "description": "Birthday party game host for Alison \u2014 Name That Tune, Freeze Dance, and more",
   "start_url": "./index.html",
   "scope": "./",
-  "display": "standalone",
+  "display": "browser",
   "orientation": "portrait",
   "background_color": "#fce4ec",
   "theme_color": "#e91e8c",
@@ -28,6 +28,9 @@
       "purpose": "any"
     }
   ],
-  "categories": ["games", "entertainment"],
+  "categories": [
+    "games",
+    "entertainment"
+  ],
   "lang": "en-US"
 }

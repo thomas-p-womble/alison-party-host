@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="no" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Alison Party" />
   <meta name="theme-color" content="#e91e8c" />
@@ -33,12 +33,25 @@
         <ol id="playlist" class="playlist"></ol>
       </div>
 
+      <div class="card premium-card" id="premium-card">
+        <h2>YouTube Premium (no ads)</h2>
+        <p class="hint" style="margin:0 0 10px">Ads appear when this runs as a Home Screen app — that mode <strong>can’t see your YouTube login</strong>. Use Safari with Premium signed in.</p>
+        <ol class="hint" style="margin:0 0 12px;padding-left:1.2rem">
+          <li>Open this page in <strong>Safari</strong> (not the Home Screen icon)</li>
+          <li>Tap <strong>Sign in to YouTube</strong> and sign in with your Premium account</li>
+          <li>Come back here and play — embeds use that Safari login</li>
+        </ol>
+        <button type="button" id="btn-yt-signin" class="btn primary">Sign in to YouTube Premium</button>
+        <button type="button" id="btn-open-safari" class="btn secondary" style="margin-top:8px">Open this page in Safari</button>
+        <p id="premium-status" class="hint" style="margin:10px 0 0"></p>
+      </div>
+
       <div class="card local-audio-card">
-        <h2>Ad-free songs (recommended)</h2>
-        <p class="hint" style="margin:0 0 10px"><strong>YouTube Premium does not work inside this app</strong> (embeds can’t use your Premium login). For zero ads, load your own MP3/M4A files. Name like <code>01-choosing-texas.mp3</code>.</p>
-        <label class="btn primary" for="local-audio-input">Load my song files (no ads)</label>
+        <h2>Optional: my song files</h2>
+        <p class="hint" style="margin:0 0 10px">Backup if you want files offline. Name like <code>01-choosing-texas.mp3</code>.</p>
+        <label class="btn ghost" for="local-audio-input">Load song files</label>
         <input type="file" id="local-audio-input" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg" multiple />
-        <p id="local-audio-status">No local files yet — YouTube may show ads until you load songs.</p>
+        <p id="local-audio-status">Optional</p>
       </div>
 
       <nav class="game-grid" aria-label="Games">
