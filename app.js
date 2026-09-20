@@ -548,34 +548,63 @@
     const status = document.getElementById('lyric-mute-status');
     if (btn) {
       if (musicMuted) {
-        btn.textContent = '🔊 UNMUTE';
+        btn.textContent = '▶ BACK';
         btn.classList.remove('is-unmuted');
         btn.classList.add('is-muted');
         btn.setAttribute('aria-pressed', 'true');
       } else {
-        btn.textContent = '🔇 MUTE';
+        btn.textContent = '⏸ CUT';
         btn.classList.remove('is-muted');
         btn.classList.add('is-unmuted');
         btn.setAttribute('aria-pressed', 'false');
       }
     }
     if (status) {
-      status.textContent = musicMuted ? 'Muted — kids sing' : 'Playing';
+      status.textContent = musicMuted ? 'Cut — kids sing' : 'Playing';
       status.classList.toggle('is-muted', musicMuted);
     }
   }
 
+  /* Sing-along cut: YouTube mute() is laggy on iOS — pause/play is instant. */
   function lyricToggleMute() {
     if (musicMuted) {
-      musicUnmute();
+      /* BACK — resume immediately */
+      musicMuted = false;
+      if (htmlAudio) {
+        htmlAudio.muted = false;
+        htmlAudio.volume = 1;
+      }
+      if (ytPlayer && musicReady) {
+        try { if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(100); } catch (_) {}
+        try { ytPlayer.unMute(); } catch (_) {}
+        try { ytPlayer.playVideo(); } catch (_) {}
+      }
+      if (htmlAudio && usingLocal) {
+        try { htmlAudio.play(); } catch (_) {}
+      }
+      musicPlaying = true;
       updateLyricMuteUI();
+      updateMiniUI();
       setCueHighlight('done');
-      tryVibrate(30);
+      tryVibrate(20);
     } else {
-      musicMute();
+      /* CUT — pause first (snappy), then mute/volume 0 as backup */
+      musicMuted = true;
+      if (ytPlayer && musicReady) {
+        try { ytPlayer.pauseVideo(); } catch (_) {}
+        try { if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(0); } catch (_) {}
+        try { ytPlayer.mute(); } catch (_) {}
+      }
+      if (htmlAudio) {
+        try { htmlAudio.pause(); } catch (_) {}
+        htmlAudio.muted = true;
+        htmlAudio.volume = 0;
+      }
+      musicPlaying = false;
       updateLyricMuteUI();
+      updateMiniUI();
       setCueHighlight('muted');
-      tryVibrate(40);
+      tryVibrate(25);
     }
   }
 
