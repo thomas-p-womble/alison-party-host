@@ -110,7 +110,7 @@
         <button type="button" class="back" data-view="home" aria-label="Back">←</button>
         <h1>Sing-Along Cue</h1>
       </header>
-      <p class="coach">Host mute for kids to sing the hook — no full lyrics. One big MUTE / UNMUTE — song keeps playing silently; unmute continues after the hook.</p>
+      <p class="coach">Host mute for kids to sing the hook — no full lyrics. One big MUTE / UNMUTE — same as the dock mute bar (keeps the song playing).</p>
       <div class="card cue-card">
         <p class="label">Song</p>
         <p id="lyric-song" class="song-title">—</p>
@@ -246,7 +246,7 @@
         <button type="button" id="mini-prev" class="mini-btn" aria-label="Previous">⏮</button>
         <button type="button" id="mini-play" class="mini-btn play" aria-label="Play or pause">▶</button>
         <button type="button" id="mini-next" class="mini-btn" aria-label="Next">⏭</button>
-        <button type="button" id="mini-mute" class="mini-btn" aria-label="Mute">🔊</button>
+        <button type="button" id="mini-mute" class="mini-btn mini-mute-loud" aria-label="Mute">🔊</button>
       </div>
     </div>
   </div>
@@ -828,72 +828,17 @@
       }
     }
     if (status) {
-      status.textContent = musicMuted ? 'Muted — song still playing (silent)' : 'Playing';
+      status.textContent = musicMuted ? 'Muted — kids sing' : 'Playing';
       status.classList.toggle('is-muted', musicMuted);
     }
   }
 
-  /*
-   * Sing-along MUTE must KEEP THE TRACK RUNNING (kids sing over silence; unmute
-   * lands after the hook). YouTube mute can lag on iPhone — we still use real
-   * mute/volume-0 (not pause). UI flips instantly on pointerdown.
-   * Seek-forward on unmute is a safety net if the player was paused somehow.
-   */
-  let lyricCutUsedPause = false;
-
+  /* Same responsive path as dock mini-mute (musicMute/unMute, keep playing). */
   function lyricToggleMute() {
-    if (musicMuted) {
-      const elapsed = Math.max(0, (Date.now() - lyricCutWallStart) / 1000);
-      const target = (Number(lyricCutMediaAt) || 0) + elapsed;
-      musicMuted = false;
-      /* Unmute volume first */
-      if (htmlAudio) {
-        htmlAudio.muted = false;
-        htmlAudio.volume = 1;
-      }
-      if (ytPlayer && musicReady) {
-        try { if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(100); } catch (_) {}
-        try { ytPlayer.unMute(); } catch (_) {}
-        /* Always nudge position forward by mute duration so we never land on the hook again */
-        try { ytPlayer.seekTo(target, true); } catch (_) {}
-        try { ytPlayer.playVideo(); } catch (_) {}
-      }
-      if (htmlAudio && usingLocal) {
-        try { htmlAudio.currentTime = target; } catch (_) {}
-        try { htmlAudio.play(); } catch (_) {}
-      }
-      musicPlaying = true;
-      lyricCutUsedPause = false;
-      updateLyricMuteUI();
-      updateMiniUI();
-      setCueHighlight('done');
-      tryVibrate(20);
-      toast('Unmuted (+' + Math.round(elapsed) + 's)');
-    } else {
-      lyricCutWallStart = Date.now();
-      lyricCutMediaAt = getMusicTime();
-      lyricCutUsedPause = false;
-      musicMuted = true;
-      /* Instant UI, then real mute — do NOT pause */
-      updateLyricMuteUI();
-      setCueHighlight('muted');
-      tryVibrate(15);
-      if (htmlAudio) {
-        htmlAudio.muted = true;
-        htmlAudio.volume = 0;
-      }
-      if (ytPlayer && musicReady) {
-        try { if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(0); } catch (_) {}
-        try { ytPlayer.mute(); } catch (_) {}
-        /* Keep playing through the mute window */
-        try { ytPlayer.playVideo(); } catch (_) {}
-      }
-      if (htmlAudio && usingLocal) {
-        try { htmlAudio.play(); } catch (_) {}
-      }
-      musicPlaying = true;
-      updateMiniUI();
-    }
+    musicToggleMute();
+    updateLyricMuteUI();
+    setCueHighlight(musicMuted ? 'muted' : 'done');
+    tryVibrate(musicMuted ? 15 : 20);
   }
 
 
